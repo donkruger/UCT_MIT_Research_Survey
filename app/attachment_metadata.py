@@ -140,6 +140,32 @@ class AttachmentCollector:
 
 # Utility functions for common attachment patterns
 
+def create_person_identifier(first_name: str, last_name: str, role: str, index: int = 1) -> str:
+    """Create a standardized person identifier for attachments."""
+    # Sanitize each part
+    first = re.sub(r'[^a-zA-Z0-9]', '', first_name.strip())
+    last = re.sub(r'[^a-zA-Z0-9]', '', last_name.strip())
+    role_clean = re.sub(r'[^a-zA-Z0-9]', '_', role.strip())
+    
+    # Create identifier
+    if first and last:
+        return f"{first}_{last}_{role_clean}_{index}"
+    elif first:
+        return f"{first}_{role_clean}_{index}"
+    elif last:
+        return f"{last}_{role_clean}_{index}"
+    else:
+        return f"{role_clean}_{index}"
+
+def get_document_type_from_id_type(id_type: str) -> str:
+    """Map ID type to document type for consistent naming."""
+    id_type_mapping = {
+        "SA ID Number": "SA_ID_Document",
+        "Foreign ID Number": "Foreign_ID_Document", 
+        "Foreign Passport Number": "Passport_Document"
+    }
+    return id_type_mapping.get(id_type, "ID_Document")
+
 def sanitize_document_label(label: str) -> str:
     """Sanitize a document label for use in filename."""
     if not label:
@@ -177,7 +203,30 @@ def sanitize_document_label(label: str) -> str:
     return sanitized.strip('_') or "Document"
 
 
-# Test function for development
+# Test functions for development
+def test_utility_functions():
+    """Test utility functions to ensure they work correctly."""
+    # Test create_person_identifier
+    result1 = create_person_identifier("John", "Smith", "Director", 1)
+    expected1 = "John_Smith_Director_1"
+    print(f"create_person_identifier test: {result1 == expected1} (got: {result1})")
+    
+    # Test with special characters
+    result2 = create_person_identifier("Mary-Jane", "O'Connor", "Auth Rep", 1)
+    expected2 = "MaryJane_OConnor_Auth_Rep_1"
+    print(f"create_person_identifier special chars test: {result2 == expected2} (got: {result2})")
+    
+    # Test get_document_type_from_id_type
+    result3 = get_document_type_from_id_type("Foreign ID Number")
+    expected3 = "Foreign_ID_Document"
+    print(f"get_document_type_from_id_type test: {result3 == expected3} (got: {result3})")
+    
+    result4 = get_document_type_from_id_type("Foreign Passport Number")
+    expected4 = "Passport_Document"
+    print(f"get_document_type_from_id_type passport test: {result4 == expected4} (got: {result4})")
+    
+    return result1 == expected1 and result2 == expected2 and result3 == expected3 and result4 == expected4
+
 def test_attachment_metadata():
     """Test function to validate attachment metadata functionality."""
     import io
@@ -217,4 +266,9 @@ def test_attachment_metadata():
 
 if __name__ == "__main__":
     # Run tests when file is executed directly
+    print("Testing utility functions...")
+    utility_test_passed = test_utility_functions()
+    print(f"Utility functions test passed: {utility_test_passed}")
+    
+    print("\nTesting attachment metadata...")
     test_attachment_metadata()

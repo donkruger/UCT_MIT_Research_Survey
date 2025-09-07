@@ -33,6 +33,15 @@ def _valid_sa_id(n: str) -> bool:
 def _is_future_date(d: datetime.date | None) -> bool:
     return bool(d and d > datetime.date.today())
 
+def _is_valid_email(email: str) -> bool:
+    """Basic email format validation."""
+    email = email.strip()
+    if not email:
+        return False
+    # Basic regex for email validation
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
 class NaturalPersonsComponent(SectionComponent):
     """
     Reusable section for capturing a list of natural persons.
@@ -110,7 +119,9 @@ class NaturalPersonsComponent(SectionComponent):
                         inst_key(ns, instance_id, f"passport_expiry_{i}"),
                         min_value=datetime.date.today() + datetime.timedelta(days=1))
 
-                persist_text_input("Email", inst_key(ns, instance_id, f"email_{i}"))
+                persist_text_input("Email", 
+                    inst_key(ns, instance_id, f"email_{i}"),
+                    help="Valid email format required")
                 # Auto-fill dialing code based on residence country where possible
                 dial_key = inst_key(ns, instance_id, f"tel_code_{i}")
                 residence_country = st.session_state.get(inst_key(ns, instance_id, f"residence_country_{i}"), "")
@@ -224,6 +235,18 @@ class NaturalPersonsComponent(SectionComponent):
                 exp = st.session_state.get(inst_key(ns, instance_id, f"passport_expiry_{i}"))
                 if not (exp and _is_future_date(exp)):
                     errs.append(f"{prefix} Passport Expiry must be a future date.")
+            
+            # Document upload validation for Foreign ID and Foreign Passport
+            if config.get("show_uploads", True) and idt in ["Foreign ID Number", "Foreign Passport Number"]:
+                id_doc = st.session_state.get(inst_key(ns, instance_id, f"id_doc_{i}"))
+                if not id_doc:
+                    doc_type = "ID Document" if idt == "Foreign ID Number" else "Passport Document"
+                    errs.append(f"{prefix} {doc_type} upload is required for {idt}.")
+            
+            # Email validation
+            email = st.session_state.get(inst_key(ns, instance_id, f"email_{i}"), "")
+            if email.strip() and not _is_valid_email(email):
+                errs.append(f"{prefix} Valid Email Address is required.")
             
             # Member role validation (if enabled)
             if config.get("show_member_roles", False):

@@ -5,34 +5,10 @@ SPEC = FormSpec(
     name="closed_corporation",
     title="Closed Corporation",
     sections=[
+        # GENERAL ENTITY DETAILS
         Section(
             title="Entity Details",
             fields=create_entity_details_fields("Entity Name (CC Registered Name)")
-        ),
-        Section(
-            title="FATCA Classification",
-            component_id="fatca_section",
-            component_args={
-                "instance_id": "fatca_info",
-                "title": "FATCA Classification"
-            }
-        ),
-        Section(
-            title="CRS Classification",
-            component_id="crs_section",
-            component_args={
-                "instance_id": "crs_info",
-                "title": "CRS Classification"
-            }
-        ),
-
-        Section(
-            title="Authorised Representative",
-            component_id="authorised_representative",
-            component_args={
-                "instance_id": "auth_rep",
-                "title": "Authorised Representative"
-            }
         ),
         Section(
             title="Physical Address",
@@ -40,6 +16,14 @@ SPEC = FormSpec(
             component_args={
                 "instance_id": "physical_address",
                 "title": "Physical Address"
+            }
+        ),
+        Section(
+            title="Authorised Representative",
+            component_id="authorised_representative",
+            component_args={
+                "instance_id": "auth_rep",
+                "title": "Authorised Representative"
             }
         ),
         Section(
@@ -58,6 +42,24 @@ SPEC = FormSpec(
                 "min_count": 1,           # At least one Member required
                 "show_uploads": True,
                 "help_text": "All CC Members must be natural persons. Member Interest Percentage and Executive Control are required."
+            }
+        ),
+        
+        # FATCA / CRS - Always last (different exercise from ReFICA)
+        Section(
+            title="FATCA Classification",
+            component_id="fatca_section",
+            component_args={
+                "instance_id": "fatca_info",
+                "title": "FATCA Classification"
+            }
+        ),
+        Section(
+            title="CRS Classification",
+            component_id="crs_section",
+            component_args={
+                "instance_id": "crs_info",
+                "title": "CRS Classification"
             }
         ),
     ]

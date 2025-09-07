@@ -5,27 +5,11 @@ SPEC = FormSpec(
     name="burial_society",
     title="Burial Society",
     sections=[
+        # GENERAL ENTITY DETAILS
         Section(
             title="Entity Details",
             fields=create_entity_details_fields()
         ),
-        Section(
-            title="FATCA Classification",
-            component_id="fatca_section",
-            component_args={
-                "instance_id": "fatca_info",
-                "title": "FATCA Classification"
-            }
-        ),
-        Section(
-            title="CRS Classification",
-            component_id="crs_section",
-            component_args={
-                "instance_id": "crs_info",
-                "title": "CRS Classification"
-            }
-        ),
-
         Section(
             title="Physical Address",
             component_id="address",
@@ -35,17 +19,16 @@ SPEC = FormSpec(
             }
         ),
         Section(
-            title="Entity Documents",
-            fields=create_entity_document_upload_fields("BURIAL_SOCIETY")
-        ),
-        
-        Section(
             title="Authorised Representative",
             component_id="authorised_representative",
             component_args={
                 "instance_id": "auth_rep",
                 "title": "Authorised Representative"
             }
+        ),
+        Section(
+            title="Entity Documents",
+            fields=create_entity_document_upload_fields("BURIAL_SOCIETY")
         ),
 
         # Required Roles per Entity Roles Rules Specification - Informal Associations
@@ -71,6 +54,24 @@ SPEC = FormSpec(
                 "role_label": "Member",
                 "min_count": 0,
                 "help_text": "Juristic entity members (beneficial owners not required for informal associations)."
+            }
+        ),
+        
+        # FATCA / CRS - Always last (different exercise from ReFICA)
+        Section(
+            title="FATCA Classification",
+            component_id="fatca_section",
+            component_args={
+                "instance_id": "fatca_info",
+                "title": "FATCA Classification"
+            }
+        ),
+        Section(
+            title="CRS Classification",
+            component_id="crs_section",
+            component_args={
+                "instance_id": "crs_info",
+                "title": "CRS Classification"
             }
         ),
     ]

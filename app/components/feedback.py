@@ -1,8 +1,18 @@
 # app/components/feedback.py
 
 import streamlit as st
+import re
 from typing import Dict, Any, Optional
 from app.utils import persist_text_input, persist_selectbox, persist_text_area
+
+def _is_valid_email(email: str) -> bool:
+    """Basic email format validation."""
+    email = email.strip()
+    if not email:
+        return False
+    # Basic regex for email validation
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
 
 def render_feedback_component() -> Optional[Dict[str, Any]]:
     """
@@ -24,7 +34,7 @@ def render_feedback_component() -> Optional[Dict[str, Any]]:
             
         entity_name = persist_text_input("Entity Name", "feedback_entity_name")
         
-        email = persist_text_input("Email", "feedback_email")
+        email = persist_text_input("Email", "feedback_email", help="Valid email format required if provided")
         
         category = persist_selectbox(
             "Feedback Category", 
@@ -41,8 +51,14 @@ def render_feedback_component() -> Optional[Dict[str, Any]]:
             placeholder="Tell us more about your experience..."
         )
         
-        # Return feedback data if any field is filled
-        if any([entity_name, email, category, rating, message]):
+        # Validate email format if provided
+        email_valid = True
+        if email and email.strip() and not _is_valid_email(email):
+            st.error("⚠️ Please enter a valid email address format.")
+            email_valid = False
+        
+        # Return feedback data if any field is filled and email is valid
+        if any([entity_name, email, category, rating, message]) and email_valid:
             return {
                 'entity_name': entity_name or "Not provided",
                 'email': email or "Not provided",

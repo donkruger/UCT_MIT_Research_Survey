@@ -5,10 +5,38 @@ SPEC = FormSpec(
     name="other",
     title="Other",
     sections=[
+        # GENERAL ENTITY DETAILS
         Section(
             title="Entity Details",
             fields=create_entity_details_fields()
         ),
+        Section(
+            title="Physical Address",
+            component_id="address",
+            component_args={
+                "instance_id": "physical_address",
+                "title": "Physical Address"
+            }
+        ),
+        Section(
+            title="Authorised Representative",
+            component_id="authorised_representative",
+            component_args={
+                "instance_id": "auth_rep",
+                "title": "Authorised Representative"
+            }
+        ),
+        Section(
+            title="Entity Documents",
+            fields=create_entity_document_upload_fields("OTHER")
+        ),
+        
+        # ENTITY SPECIFIC SECTIONS
+        Section(title="Associated People", component_id="natural_persons", component_args={
+            "instance_id": "associated", "role_label": "Person", "min_count": 0
+        }),
+        
+        # FATCA / CRS - Always last (different exercise from ReFICA)
         Section(
             title="FATCA Classification",
             component_id="fatca_section",
@@ -25,31 +53,5 @@ SPEC = FormSpec(
                 "title": "CRS Classification"
             }
         ),
-
-        Section(
-            title="Authorised Representative",
-            component_id="authorised_representative",
-            component_args={
-                "instance_id": "auth_rep",
-                "title": "Authorised Representative"
-            }
-        ),
-
-        Section(
-            title="Physical Address",
-            component_id="address",
-            component_args={
-                "instance_id": "physical_address",
-                "title": "Physical Address"
-            }
-        ),
-        Section(
-            title="Entity Documents",
-            fields=create_entity_document_upload_fields("OTHER")
-        ),
-        
-        Section(title="Associated People", component_id="natural_persons", component_args={
-            "instance_id": "associated", "role_label": "Person", "min_count": 0
-        }),
     ]
 )

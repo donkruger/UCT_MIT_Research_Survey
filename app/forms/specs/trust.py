@@ -5,24 +5,17 @@ SPEC = FormSpec(
     name="trust",
     title="Trust",
     sections=[
+        # GENERAL ENTITY DETAILS
         Section(
             title="Entity Details",
             fields=create_entity_details_fields("Entity Name (Trust Name)", include_trust_fields=True)
         ),
         Section(
-            title="FATCA Classification",
-            component_id="fatca_section",
+            title="Trust Physical Address",
+            component_id="address",
             component_args={
-                "instance_id": "fatca_info",
-                "title": "FATCA Classification"
-            }
-        ),
-        Section(
-            title="CRS Classification",
-            component_id="crs_section",
-            component_args={
-                "instance_id": "crs_info",
-                "title": "CRS Classification"
+                "instance_id": "physical_address",
+                "title": "Trust Physical Address"
             }
         ),
         Section(
@@ -31,15 +24,6 @@ SPEC = FormSpec(
             component_args={
                 "instance_id": "auth_rep",
                 "title": "Authorised Representative"
-            }
-        ),
-
-        Section(
-            title="Trust Physical Address",
-            component_id="address",
-            component_args={
-                "instance_id": "physical_address",
-                "title": "Trust Physical Address"
             }
         ),
         Section(
@@ -104,6 +88,24 @@ SPEC = FormSpec(
                 "role_label": "Beneficiary",
                 "min_count": 0,
                 "help_text": "Juristic entity beneficiaries. Beneficial owners must be captured."
+            }
+        ),
+        
+        # FATCA / CRS - Always last (different exercise from ReFICA)
+        Section(
+            title="FATCA Classification",
+            component_id="fatca_section",
+            component_args={
+                "instance_id": "fatca_info",
+                "title": "FATCA Classification"
+            }
+        ),
+        Section(
+            title="CRS Classification",
+            component_id="crs_section",
+            component_args={
+                "instance_id": "crs_info",
+                "title": "CRS Classification"
             }
         ),
     ]

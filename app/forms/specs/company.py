@@ -5,24 +5,17 @@ SPEC = FormSpec(
     name="company",
     title="Company",
     sections=[
+        # GENERAL ENTITY DETAILS
         Section(
             title="Entity Details",
             fields=create_entity_details_fields()
         ),
         Section(
-            title="FATCA Classification",
-            component_id="fatca_section",
+            title="Entity Physical Address",
+            component_id="address",
             component_args={
-                "instance_id": "fatca_info",
-                "title": "FATCA Classification"
-            }
-        ),
-        Section(
-            title="CRS Classification",
-            component_id="crs_section",
-            component_args={
-                "instance_id": "crs_info",
-                "title": "CRS Classification"
+                "instance_id": "physical_address",
+                "title": "Entity Physical Address"
             }
         ),
         Section(
@@ -31,15 +24,6 @@ SPEC = FormSpec(
             component_args={
                 "instance_id": "auth_rep",
                 "title": "Authorised Representative"
-            }
-        ),
-
-        Section(
-            title="Entity Physical Address",
-            component_id="address",
-            component_args={
-                "instance_id": "physical_address",
-                "title": "Entity Physical Address"
             }
         ),
         Section(
@@ -84,6 +68,24 @@ SPEC = FormSpec(
                 "role_label": "Shareholder",
                 "min_count": 0,
                 "help_text": "Juristic entity shareholders with percentage shareholding capture."
+            }
+        ),
+        
+        # FATCA / CRS - Always last (different exercise from ReFICA)
+        Section(
+            title="FATCA Classification",
+            component_id="fatca_section",
+            component_args={
+                "instance_id": "fatca_info",
+                "title": "FATCA Classification"
+            }
+        ),
+        Section(
+            title="CRS Classification",
+            component_id="crs_section",
+            component_args={
+                "instance_id": "crs_info",
+                "title": "CRS Classification"
             }
         ),
     ]
