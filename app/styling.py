@@ -114,25 +114,51 @@ and applies the half-second fade-in animation.
     color: white !important;
 }
 
-/* Reduce top spacing/padding on all pages */
+/* Significantly reduce top spacing/padding on all pages */
 .main .block-container {
-    padding-top: 1rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 1rem !important;
     max-width: 100% !important;
 }
 
-/* Reduce spacing around headers */
+/* Remove Streamlit header completely */
 .stApp > header {
     height: 0 !important;
+    display: none !important;
 }
 
-/* Minimize top margin on main content */
-.element-container:first-child {
+/* Remove all top margins from first elements */
+.element-container:first-child,
+.element-container:first-child > div,
+.element-container:first-child > div > div {
     margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
-/* Reduce margin on gradient titles */
+/* Remove all top margins from gradient titles */
 .gradient-title {
     margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Remove top spacing from main content area */
+[data-testid="stMain"] {
+    padding-top: 0 !important;
+}
+
+[data-testid="stMain"] > div {
+    padding-top: 0 !important;
+}
+
+/* Remove top spacing from the main container */
+.main {
+    padding-top: 0 !important;
+}
+
+/* Ensure the first element in main has no top spacing */
+.main .block-container > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 /* Getting Started Card Hover Effects */
