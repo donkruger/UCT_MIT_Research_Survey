@@ -190,7 +190,35 @@ def serialize_answers_with_metadata(spec: FormSpec, ns: str):
 
         answers[sec.title] = sec_dict
 
+    # Post-process to extract controlling persons data as separate sections
+    _extract_controlling_persons_sections(answers)
+
     return answers, attachment_collector
+
+
+def _extract_controlling_persons_sections(answers: Dict[str, Any]) -> None:
+    """
+    Extract controlling persons data from FATCA/CRS sections and add as separate sections.
+    
+    This ensures controlling persons data appears as individual fields in CSV output
+    rather than as nested JSON strings.
+    """
+    sections_to_check = ["FATCA Classification", "CRS Classification"]
+    
+    for section_name in sections_to_check:
+        if section_name in answers:
+            section_data = answers[section_name]
+            if isinstance(section_data, dict) and "Controlling Persons" in section_data:
+                cp_data = section_data["Controlling Persons"]
+                
+                # Only extract if it's the expected structure with Count and Records
+                if isinstance(cp_data, dict) and "Count" in cp_data and "Records" in cp_data:
+                    # Add as separate section with descriptive name
+                    cp_section_name = f"{section_name} - Controlling Persons"
+                    answers[cp_section_name] = cp_data
+                    
+                    # Remove from original section to avoid duplication
+                    del section_data["Controlling Persons"]
 
 
 def serialize_answers(spec: FormSpec, ns: str) -> Tuple[Dict[str, Any], List[Any]]:

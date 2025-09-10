@@ -159,6 +159,9 @@ def serialize_controlling_person_section(ns: str, instance_id: str,
         
     Returns:
         tuple[dict, list]: (payload_dict, uploads_list)
+        
+    Note: Returns controlling person data directly as "Controlling Persons" section
+    to ensure proper CSV flattening with individual fields per row.
     """
     payload = {}
     uploads = []
@@ -172,10 +175,12 @@ def serialize_controlling_person_section(ns: str, instance_id: str,
             "min_count": 1
         }
         cp_payload, cp_uploads = cp_component.serialize(ns=ns, instance_id=cp_instance_id, **cp_config)
+        # Return the controlling person data directly as "Controlling Persons" section
+        # This ensures the CSV generator processes it as a collection with Records
         payload["Controlling Persons"] = cp_payload
         uploads.extend(cp_uploads)
     else:
-        payload["Controlling Persons"] = {"Error": "Component not available"}
+        payload["Controlling Persons"] = {"Count": 0, "Records": [], "Error": "Component not available"}
     
     return payload, uploads
 

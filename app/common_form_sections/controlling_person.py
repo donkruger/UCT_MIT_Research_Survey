@@ -14,6 +14,16 @@ from app.common_form_sections.base import SectionComponent
 from app.utils import inst_key, persist_text_input, persist_selectbox, persist_number_input, persist_date_input
 from app.controlled_lists_enhanced import get_countries, get_tin_options_with_descriptions, get_member_role_options
 
+# South African provinces for conditional logic
+SA_PROVINCES = ["", "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal",
+                "Limpopo", "Mpumalanga", "North West", "Northern Cape", "Western Cape"]
+
+def _postal_ok(code: str, country: str) -> bool:
+    """Validate postal code based on country - 4 digits for SA, flexible for others."""
+    if (country or "").strip() == "South Africa":
+        return bool(re.fullmatch(r"\d{4}", code or ""))
+    return bool(code and len(code) <= 10)  # permissive for non-SA
+
 
 
 
@@ -111,16 +121,21 @@ class ControllingPersonComponent(SectionComponent):
                 # Street details
                 col1, col2 = st.columns(2)
                 with col1:
-                    persist_text_input("Street Number",
-                        inst_key(ns, instance_id, f"street_number_{i}"))
                     persist_text_input("Unit Number",
                         inst_key(ns, instance_id, f"unit_number_{i}"))
+                    persist_text_input("Street Number",
+                        inst_key(ns, instance_id, f"street_number_{i}"))
                         
                 with col2:
                     persist_text_input("Complex Name",
                         inst_key(ns, instance_id, f"complex_name_{i}"))
                     persist_text_input("Street Name",
                         inst_key(ns, instance_id, f"street_name_{i}"))
+                
+                # Address country (positioned above regional details)
+                persist_selectbox("Address Country",
+                    inst_key(ns, instance_id, f"address_country_{i}"),
+                    options=get_countries(include_empty=True, return_codes=False))
                 
                 # City and regional details
                 col1, col2 = st.columns(2)
@@ -131,15 +146,23 @@ class ControllingPersonComponent(SectionComponent):
                         inst_key(ns, instance_id, f"city_{i}"))
                         
                 with col2:
-                    persist_text_input("Province/State",
-                        inst_key(ns, instance_id, f"province_{i}"))
-                    persist_text_input("Postal Code",
+                    # Province/State with conditional logic based on Address Country
+                    selected_address_country = st.session_state.get(inst_key(ns, instance_id, f"address_country_{i}"), "")
+                    if selected_address_country == "South Africa":
+                        persist_selectbox("Province/State",
+                            inst_key(ns, instance_id, f"province_{i}"),
+                            options=SA_PROVINCES)
+                    else:
+                        # For non-SA countries, set to "Other" and make it read-only
+                        province_key = inst_key(ns, instance_id, f"province_{i}")
+                        if selected_address_country and selected_address_country != "South Africa":
+                            st.session_state[province_key] = "Other"
+                        st.text_input("Province/State", value="Other" if selected_address_country and selected_address_country != "South Africa" else "", disabled=True, key=f"province_display_{i}")
+                    
+                    # Postal Code with conditional validation message
+                    pc_label = "Postal Code (must be 4 digits)" if selected_address_country == "South Africa" else "Postal Code"
+                    persist_text_input(pc_label,
                         inst_key(ns, instance_id, f"postal_code_{i}"))
-                
-                # Address country
-                persist_selectbox("Address Country",
-                    inst_key(ns, instance_id, f"address_country_{i}"),
-                    options=get_countries(include_empty=True, return_codes=False))
 
                 # Add separator between people
                 if i < st.session_state.get(count_key, 0) - 1:
@@ -212,9 +235,7 @@ class ControllingPersonComponent(SectionComponent):
                     errors.append(f"{prefix} Controlling Person TIN is required when TIN Option is 'Has TIN'.")
 
             # Physical Address validation (required fields)
-            street_number = (st.session_state.get(inst_key(ns, instance_id, f"street_number_{i}")) or "").strip()
-            if not street_number:
-                errors.append(f"{prefix} Street Number is required.")
+            # Note: Street Number and Complex Name are now optional
             
             street_name = (st.session_state.get(inst_key(ns, instance_id, f"street_name_{i}")) or "").strip()
             if not street_name:
@@ -228,13 +249,25 @@ class ControllingPersonComponent(SectionComponent):
             if not city:
                 errors.append(f"{prefix} City is required.")
             
-            postal_code = (st.session_state.get(inst_key(ns, instance_id, f"postal_code_{i}")) or "").strip()
-            if not postal_code:
-                errors.append(f"{prefix} Postal Code is required.")
-            
             address_country = (st.session_state.get(inst_key(ns, instance_id, f"address_country_{i}")) or "").strip()
             if not address_country:
                 errors.append(f"{prefix} Address Country is required.")
+            
+            # Province validation - required only for South Africa
+            if address_country == "South Africa":
+                province = (st.session_state.get(inst_key(ns, instance_id, f"province_{i}")) or "").strip()
+                if not province:
+                    errors.append(f"{prefix} Province is required for South Africa.")
+            
+            # Postal Code validation with country-specific rules
+            postal_code = (st.session_state.get(inst_key(ns, instance_id, f"postal_code_{i}")) or "").strip()
+            if not postal_code:
+                errors.append(f"{prefix} Postal Code is required.")
+            elif not _postal_ok(postal_code, address_country):
+                if address_country == "South Africa":
+                    errors.append(f"{prefix} Postal Code must be exactly 4 digits for South Africa.")
+                else:
+                    errors.append(f"{prefix} Postal Code is invalid.")
 
         return errors
 
@@ -254,6 +287,9 @@ class ControllingPersonComponent(SectionComponent):
                 except Exception:
                     dob_str = str(dob)
 
+            # Get address country for conditional province handling
+            address_country = st.session_state.get(inst_key(ns, instance_id, f"address_country_{i}"), "")
+            
             person_data = {
                 # Basic personal information
                 "First Name": st.session_state.get(inst_key(ns, instance_id, f"first_name_{i}"), ""),
@@ -262,8 +298,6 @@ class ControllingPersonComponent(SectionComponent):
                 "Country of Birth": st.session_state.get(inst_key(ns, instance_id, f"birth_country_{i}"), ""),
                 "Role/Designation": st.session_state.get(inst_key(ns, instance_id, f"member_role_{i}"), ""),
                 "Country of Tax Residence": st.session_state.get(inst_key(ns, instance_id, f"tax_residence_country_{i}"), ""),
-                
-
                 
                 # TIN information
                 "TIN Option": st.session_state.get(inst_key(ns, instance_id, f"tin_option_{i}"), ""),
@@ -276,10 +310,15 @@ class ControllingPersonComponent(SectionComponent):
                 "Street Name": st.session_state.get(inst_key(ns, instance_id, f"street_name_{i}"), ""),
                 "Suburb": st.session_state.get(inst_key(ns, instance_id, f"suburb_{i}"), ""),
                 "City": st.session_state.get(inst_key(ns, instance_id, f"city_{i}"), ""),
-                "Province/State": st.session_state.get(inst_key(ns, instance_id, f"province_{i}"), ""),
+                "Address Country": address_country,
                 "Postal Code": st.session_state.get(inst_key(ns, instance_id, f"postal_code_{i}"), ""),
-                "Address Country": st.session_state.get(inst_key(ns, instance_id, f"address_country_{i}"), ""),
             }
+            
+            # Add Province/State based on country - SA provinces or "Other"
+            if address_country == "South Africa":
+                person_data["Province/State"] = st.session_state.get(inst_key(ns, instance_id, f"province_{i}"), "")
+            else:
+                person_data["Province/State"] = "Other"
             people.append(person_data)
 
         payload = {"Count": n, "Records": people}

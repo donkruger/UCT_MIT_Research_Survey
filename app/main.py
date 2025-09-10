@@ -96,7 +96,8 @@ def main():
     <p style="color: #2c5aa0; line-height: 1.6; margin-bottom: 1rem; font-size: 1rem;"><strong>Welcome to our Entity Onboarding system!</strong> Please follow these simple steps:</p>
     <ul style="color: #2c5aa0; line-height: 1.8; margin-bottom: 1.5rem; padding-left: 1.5rem;">
         <li><strong>Select your entity type</strong> from the dropdown below</li>
-        <li><strong>Enter your Entity User ID</strong> for identification</li>
+        <li><strong>Enter your Entity User ID</strong> for identification (also known asyour SX number / account number that defines your entity account)</li>
+        <li><strong>After capturing your data in each field, hit the enter / return key</strong> ⏎</li>
         <li><strong>Complete all required fields</strong> in each section (they'll expand as you click them)</li>
     </ul>
     <div class="progress-warning" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); padding: 1rem; border-radius: 10px; border-left: 3px solid #ff9800; margin: 1rem 0 1.5rem 0; box-shadow: 0 1px 5px rgba(255, 152, 0, 0.1); transition: box-shadow 0.3s ease;">

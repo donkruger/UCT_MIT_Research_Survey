@@ -1,0 +1,101 @@
+Section,Record #,Field,Value
+Submission Details,1,Entity Type,Trust
+Entity Details,1,Entity Name (Trust Name),Juzzy Trusts Inc
+Entity Details,1,Masters Office where the Trust was registered,PMB
+Entity Details,1,Trading Name (Only if different from Registered Name),Juzzy
+Entity Details,1,Registration Number,IT1234567
+Entity Details,1,Country of Registration,South Africa
+Entity Details,1,Date of Registration / Establishment,2015/09/01
+Entity Details,1,Source of Funds,Company Profits
+Entity Details,1,Industry,Accounting Services
+Trust Physical Address,1,Unit Number,
+Trust Physical Address,1,Complex Name,
+Trust Physical Address,1,Street Number,27
+Trust Physical Address,1,Street Name,Twelfth
+Trust Physical Address,1,Suburb,Parkmore
+Trust Physical Address,1,City,Joburg
+Trust Physical Address,1,Country,South Africa
+Trust Physical Address,1,Postal Code,1234
+Trust Physical Address,1,Province,Eastern Cape
+Authorised Representative,1,Title,Mr
+Authorised Representative,1,First Name,Justin
+Authorised Representative,1,Last Name,Pearse
+Authorised Representative,1,Gender,Male
+Authorised Representative,1,Date of Birth,1972/07/24
+Authorised Representative,1,Marital Status,Married
+Authorised Representative,1,Identification Type,Foreign ID Number
+Authorised Representative,1,SA ID,
+Authorised Representative,1,Foreign ID,1234567
+Authorised Representative,1,Passport Number,
+Authorised Representative,1,Passport Country,
+Authorised Representative,1,Passport Expiry,
+Authorised Representative,1,Email,justin@justinp.co
+Authorised Representative,1,Citizenship,South Africa
+Authorised Representative,1,Country of Residence,South Africa
+Authorised Representative,1,Phone Dialing Code,27
+Authorised Representative,1,Phone Number,714917119
+Entity Documents,1,Copy of the Trust Deed or Founding Document; OR Letter of Authority issued and signed by the Master of the High Court,TRUE
+Entity Documents,1,Income Tax registration confirmation (ITSA/ IT34/ Tax Compliance Certificate) OR letter confirming not registered for tax with reason,TRUE
+Entity Documents,1,Mandate/ minutes/ resolution signed by all trustees confirming authority of person(s) to act,TRUE
+Entity Documents,1,If ownership includes a related legal entity: that entity's registration docs and identity documents of beneficial owners in that entity,TRUE
+Trust Founder / Settlor,1,First Name,Justin
+Trust Founder / Settlor,1,Surname,Pearse
+Trust Founder / Settlor,1,User ID,1234567
+Trust Founder / Settlor,1,Date of Birth,1972/07/24
+Trust Founder / Settlor,1,Country of Residence,South Africa
+Trust Founder / Settlor,1,ID Type,SA ID Number
+Trust Founder / Settlor,1,SA ID,7207245002088
+Trust Founder / Settlor,1,Foreign ID,
+Trust Founder / Settlor,1,Passport No,
+Trust Founder / Settlor,1,Passport Country,
+Trust Founder / Settlor,1,Passport Expiry,
+Trust Founder / Settlor,1,Email,justin@justinpearse.com
+Trust Founder / Settlor,1,Telephone,714917119
+Trust Founder / Settlor,1,ID Doc Uploaded,Not Required
+Trustees (Natural Persons),1,First Name,Justin
+Trustees (Natural Persons),1,Surname,Pearse
+Trustees (Natural Persons),1,User ID,1234567
+Trustees (Natural Persons),1,Date of Birth,1972/07/24
+Trustees (Natural Persons),1,Country of Residence,South Africa
+Trustees (Natural Persons),1,ID Type,Foreign ID Number
+Trustees (Natural Persons),1,SA ID,
+Trustees (Natural Persons),1,Foreign ID,1234567
+Trustees (Natural Persons),1,Passport No,
+Trustees (Natural Persons),1,Passport Country,
+Trustees (Natural Persons),1,Passport Expiry,
+Trustees (Natural Persons),1,Email,justin@justinpearse.co
+Trustees (Natural Persons),1,Telephone,714917119
+Trustees (Natural Persons),1,ID Doc Uploaded,TRUE
+Trustees (Juristic Entities),1,Entity Type,Company
+Trustees (Juristic Entities),1,Entity Name,Juzzy Trust
+Trustees (Juristic Entities),1,Registration Number,2019/12345/20
+Trustees (Juristic Entities),1,Country of Registration,South Africa
+Beneficiaries (Natural Persons),1,First Name,Justin
+Beneficiaries (Natural Persons),1,Surname,Pearse
+Beneficiaries (Natural Persons),1,User ID,1234567
+Beneficiaries (Natural Persons),1,Date of Birth,1972/07/24
+Beneficiaries (Natural Persons),1,Country of Residence,South Africa
+Beneficiaries (Natural Persons),1,ID Type,SA ID Number
+Beneficiaries (Natural Persons),1,SA ID,7207245002088
+Beneficiaries (Natural Persons),1,Foreign ID,
+Beneficiaries (Natural Persons),1,Passport No,
+Beneficiaries (Natural Persons),1,Passport Country,
+Beneficiaries (Natural Persons),1,Passport Expiry,
+Beneficiaries (Natural Persons),1,Email,justin@justinpearse.co
+Beneficiaries (Natural Persons),1,Telephone,714917119
+Beneficiaries (Natural Persons),1,ID Doc Uploaded,Not Required
+Beneficiaries (Juristic Entities),1,Entity Type,Company
+Beneficiaries (Juristic Entities),1,Entity Name,Juzzy Pty Ltd
+Beneficiaries (Juristic Entities),1,Registration Number,2019/1234567/1234
+Beneficiaries (Juristic Entities),1,Country of Registration,South Africa
+FATCA Classification,1,FATCA Classification,NFFE
+FATCA Classification,1,NFFE Type,PASSIVE_NFFE
+FATCA Classification,1,Controlling Persons,"{'Count': 1, 'Records': [{'First Name': 'Justin', 'Last Name': 'Pearse', 'Date of Birth': '1972/07/24', 'Country of Birth': 'South Africa', 'Role/Designation': 'Chairperson', 'Country of Tax Residence': 'South Africa', 'TIN Option': 'UNABLE_TO_OBTAIN', 'Controlling Person TIN': '', 'Street Number': '27', 'Unit Number': '', 'Complex Name': '', 'Street Name': 'Twelfth Street', 'Suburb': 'Parkmore', 'City': 'Joburg', 'Province/State': '', 'Postal Code': '12345', 'Address Country': 'South Africa'}]}"
+CRS Classification,1,CRS Classification,PASSIVE_NFE
+CRS Classification,1,Controlling Persons,"{'Count': 1, 'Records': [{'First Name': 'Justin', 'Last Name': 'Pearse', 'Date of Birth': '1972/07/24', 'Country of Birth': 'South Africa', 'Role/Designation': 'Chairperson', 'Country of Tax Residence': 'South Africa', 'TIN Option': 'HAS_TIN', 'Controlling Person TIN': '912-70-1234', 'Street Number': '27', 'Unit Number': '', 'Complex Name': '', 'Street Name': 'Twelfth', 'Suburb': 'Parkmore', 'City': 'Joburg', 'Province/State': 'Gauteng', 'Postal Code': '12345', 'Address Country': 'South Africa'}]}"
+Submission Details,1,Entity User ID,123456
+Declaration,1,Declaration Accepted,TRUE
+Declaration,1,Signatory 1 Name,Justin Pearse
+Declaration,1,Signatory 1 Designation,Main Meneer
+Declaration,1,Signatory 2 Name,
+Declaration,1,Signatory 2 Designation,
