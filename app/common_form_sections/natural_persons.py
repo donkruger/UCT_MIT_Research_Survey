@@ -9,7 +9,7 @@ from app.utils import (
     persist_number_input, persist_text_input, persist_selectbox,
     persist_date_input, persist_file_uploader
 )
-from app.controlled_lists_enhanced import get_member_role_options, get_countries, get_dial_code_for_country_label
+from app.controlled_lists_enhanced import get_member_role_options, get_countries
 
 def _digits_only(s: str) -> str:
     return re.sub(r"\D", "", s or "")
@@ -32,15 +32,6 @@ def _valid_sa_id(n: str) -> bool:
 
 def _is_future_date(d: datetime.date | None) -> bool:
     return bool(d and d > datetime.date.today())
-
-def _is_valid_email(email: str) -> bool:
-    """Basic email format validation."""
-    email = email.strip()
-    if not email:
-        return False
-    # Basic regex for email validation
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return bool(re.match(pattern, email))
 
 class NaturalPersonsComponent(SectionComponent):
     """
@@ -118,22 +109,6 @@ class NaturalPersonsComponent(SectionComponent):
                     persist_date_input("Passport Expiry (YYYY/MM/DD)",
                         inst_key(ns, instance_id, f"passport_expiry_{i}"),
                         min_value=datetime.date.today() + datetime.timedelta(days=1))
-
-                persist_text_input("Email", 
-                    inst_key(ns, instance_id, f"email_{i}"),
-                    help="Valid email format required")
-                # Auto-fill dialing code based on residence country where possible
-                dial_key = inst_key(ns, instance_id, f"tel_code_{i}")
-                residence_country = st.session_state.get(inst_key(ns, instance_id, f"residence_country_{i}"), "")
-                auto_dial = get_dial_code_for_country_label(residence_country)
-                if auto_dial and not st.session_state.get(dial_key):
-                    # Set only permanent key - persist_widget will handle the temp key
-                    st.session_state[dial_key] = auto_dial
-                dc, pn = st.columns([1,2])
-                with dc:
-                    persist_text_input("Dialing Code", dial_key, help="Auto-filled from Country of Residence")
-                with pn:
-                    persist_text_input("Telephone", inst_key(ns, instance_id, f"tel_{i}"))
                 
                 # Role-specific additional fields per Entity Roles Rules Specification
                 self._render_role_specific_fields(ns, instance_id, i, config)
@@ -243,11 +218,6 @@ class NaturalPersonsComponent(SectionComponent):
                     doc_type = "ID Document" if idt == "Foreign ID Number" else "Passport Document"
                     errs.append(f"{prefix} {doc_type} upload is required for {idt}.")
             
-            # Email validation
-            email = st.session_state.get(inst_key(ns, instance_id, f"email_{i}"), "")
-            if email.strip() and not _is_valid_email(email):
-                errs.append(f"{prefix} Valid Email Address is required.")
-            
             # Member role validation (if enabled)
             if config.get("show_member_roles", False):
                 member_role = st.session_state.get(inst_key(ns, instance_id, f"member_role_{i}"), "")
@@ -300,10 +270,6 @@ class NaturalPersonsComponent(SectionComponent):
                 "Passport No": st.session_state.get(inst_key(ns, instance_id, f"passport_no_{i}"), ""),
                 "Passport Country": st.session_state.get(inst_key(ns, instance_id, f"passport_country_{i}"), ""),
                 "Passport Expiry": passport_expiry_str,
-                
-                # Contact fields
-                "Email": st.session_state.get(inst_key(ns, instance_id, f"email_{i}"), ""),
-                "Telephone": st.session_state.get(inst_key(ns, instance_id, f"tel_{i}"), ""),
                 
                 # Upload status (only required for foreign ID/passport)
                 "ID Doc Uploaded": (
@@ -396,10 +362,6 @@ class NaturalPersonsComponent(SectionComponent):
                 "Passport No": st.session_state.get(inst_key(ns, instance_id, f"passport_no_{i}"), ""),
                 "Passport Country": st.session_state.get(inst_key(ns, instance_id, f"passport_country_{i}"), ""),
                 "Passport Expiry": passport_expiry_str,
-                
-                # Contact fields
-                "Email": st.session_state.get(inst_key(ns, instance_id, f"email_{i}"), ""),
-                "Telephone": st.session_state.get(inst_key(ns, instance_id, f"tel_{i}"), ""),
                 
                 # Upload status (only required for foreign ID/passport)
                 "ID Doc Uploaded": (

@@ -43,26 +43,28 @@ class FatcaSectionComponent(SectionComponent):
         
         # Get the mapping of codes to their descriptive labels
         fatca_options = get_fatca_classifications_with_descriptions()
-        fatca_codes = ["US_PERSON", "FFI", "NFFE"]
         
-        # Initialize with default if not set
-        if classification_key not in st.session_state:
-            st.session_state[classification_key] = fatca_codes[0]  # Default to first option
+        # Add blank option at the beginning and include the valid codes
+        fatca_codes = ["", "US_PERSON", "FFI", "NFFE"]
+        
+        # Create display options with blank first option
+        display_options = ["-- Please select a FATCA Classification --"]
+        display_options.extend(fatca_options)
+        
+        # Don't initialize with a default value - let it remain empty
+        # This ensures the user must actively select an option
         
         # Use format_func to display rich text while storing the clean code
         classification = persist_selectbox(
             "FATCA Classification",
             classification_key,
             options=fatca_codes,
-            format_func=lambda code: fatca_options[fatca_codes.index(code)] if code in fatca_codes else code,
-            help="Select the appropriate FATCA classification for this entity"
+            format_func=lambda code: display_options[fatca_codes.index(code)] if code in fatca_codes else code,
+            help="Select the appropriate FATCA classification for this entity (required)"
         )
         
-        # Now classification should always have a value, but add safety check
-        if not classification:
-            classification = fatca_codes[0]  # Fallback to default
-        
         # Conditional rendering based on FATCA Classification
+        # Only render sub-sections if a valid classification is selected
         if classification == "US_PERSON":
             self._render_us_person_section(ns, instance_id)
         elif classification == "FFI":
@@ -81,9 +83,7 @@ class FatcaSectionComponent(SectionComponent):
         us_person_options = get_us_person_types_with_descriptions()
         us_person_codes = ["SPECIFIED_US_PERSON", "NON_SPECIFIED_US_PERSON"]
         
-        # Initialize with default if not set
-        if us_person_type_key not in st.session_state:
-            st.session_state[us_person_type_key] = us_person_codes[0]  # Default to first option
+        # Don't initialize with a default - let user select
         
         # Use format_func to display rich text while storing the clean code
         us_person_type = persist_selectbox(
@@ -113,9 +113,7 @@ class FatcaSectionComponent(SectionComponent):
         ffi_options = get_ffi_categories_with_descriptions()
         ffi_codes = ["REPORTING_FFI", "REGISTERED_DEEMED_COMPLIANT", "NON_REPORTING_FFI", "EXEMPT_BENEFICIAL_OWNER", "NON_PARTICIPATING_FFI", "CERTIFIED_DEEMED_COMPLIANT"]
         
-        # Initialize with default if not set
-        if ffi_category_key not in st.session_state:
-            st.session_state[ffi_category_key] = ffi_codes[0]  # Default to first option
+        # Don't initialize with a default - let user select
         
         # Use format_func to display rich text while storing the clean code
         ffi_category = persist_selectbox(
@@ -140,9 +138,7 @@ class FatcaSectionComponent(SectionComponent):
         nffe_options = get_nffe_types_with_descriptions()
         nffe_codes = ["ACTIVE_NFFE", "PASSIVE_NFFE", "DIRECT_REPORTING_NFFE"]
         
-        # Initialize with default if not set
-        if nffe_type_key not in st.session_state:
-            st.session_state[nffe_type_key] = nffe_codes[0]  # Default to first option
+        # Don't initialize with a default - let user select
         
         # Use format_func to display rich text while storing the clean code
         nffe_type = persist_selectbox(

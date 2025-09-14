@@ -41,26 +41,28 @@ class CrsSectionComponent(SectionComponent):
         
         # Get the mapping of codes to their descriptive labels
         crs_options = get_crs_classifications_with_descriptions()
-        crs_codes = ["FI_INVESTMENT_ENTITY", "FI_DEPOSITORY_CUSTODIAL_INSURANCE", "NON_REPORTING_FI", "ACTIVE_NFE_STOCK_EXCHANGE", "OTHER_ACTIVE_NFE", "PASSIVE_NFE"]
         
-        # Initialize with default if not set
-        if classification_key not in st.session_state:
-            st.session_state[classification_key] = crs_codes[0]  # Default to first option
+        # Add blank option at the beginning and include the valid codes
+        crs_codes = ["", "FI_INVESTMENT_ENTITY", "FI_DEPOSITORY_CUSTODIAL_INSURANCE", "NON_REPORTING_FI", "ACTIVE_NFE_STOCK_EXCHANGE", "OTHER_ACTIVE_NFE", "PASSIVE_NFE"]
+        
+        # Create display options with blank first option
+        display_options = ["-- Please select a CRS Classification --"]
+        display_options.extend(crs_options)
+        
+        # Don't initialize with a default value - let it remain empty
+        # This ensures the user must actively select an option
         
         # Use format_func to display rich text while storing the clean code
         classification = persist_selectbox(
             "CRS Classification",
             classification_key,
             options=crs_codes,
-            format_func=lambda code: crs_options[crs_codes.index(code)] if code in crs_codes else code,
-            help="Select the appropriate CRS classification for this entity"
+            format_func=lambda code: display_options[crs_codes.index(code)] if code in crs_codes else code,
+            help="Select the appropriate CRS classification for this entity (required)"
         )
         
-        # Now classification should always have a value, but add safety check
-        if not classification:
-            classification = crs_codes[0]  # Fallback to default
-        
         # Conditional rendering based on CRS Classification
+        # Only render sub-sections if a valid classification is selected
         if classification == "FI_INVESTMENT_ENTITY":
             self._render_investment_entity_section(ns, instance_id)
         elif classification == "FI_DEPOSITORY_CUSTODIAL_INSURANCE":
@@ -85,9 +87,7 @@ class CrsSectionComponent(SectionComponent):
         investment_options = get_investment_entity_types_with_descriptions()
         investment_codes = ["NON_PARTICIPATING_JURISDICTION", "OTHER_INVESTMENT_ENTITY"]
         
-        # Initialize with default if not set
-        if investment_entity_type_key not in st.session_state:
-            st.session_state[investment_entity_type_key] = investment_codes[0]  # Default to first option
+        # Don't initialize with a default - let user select
         
         # Use format_func to display rich text while storing the clean code
         investment_entity_type = persist_selectbox(

@@ -42,10 +42,16 @@ def inst_key(ns: str, instance_id: str, key: str) -> str:
 def _cleanup_legacy_values():
     """Clean up any legacy session state values that might cause errors."""
     # Clean up any province values that might be set to "Other" which is no longer valid
-    keys_to_check = [k for k in st.session_state.keys() if k.endswith("__province")]
-    for key in keys_to_check:
-        if st.session_state.get(key) == "Other":
-            st.session_state[key] = ""
+    try:
+        # Get all keys safely
+        all_keys = list(st.session_state.keys()) if hasattr(st.session_state, 'keys') else []
+        keys_to_check = [k for k in all_keys if k.endswith("__province")]
+        for key in keys_to_check:
+            if st.session_state.get(key) == "Other":
+                st.session_state[key] = ""
+    except Exception:
+        # If there's any issue with cleanup, just continue
+        pass
 
 def initialize_state():
     """Initializes all required session state variables using setdefault."""
