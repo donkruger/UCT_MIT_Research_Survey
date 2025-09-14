@@ -9,7 +9,7 @@ import streamlit as st
 from app.common_form_sections.base import SectionComponent
 from app.utils import inst_key
 from app.utils import (
-    persist_text_input, persist_selectbox, persist_date_input
+    persist_text_input, persist_selectbox, persist_date_input, persist_file_uploader
 )
 from app.controlled_lists_enhanced import (
     get_title_options, get_gender_options, get_marital_status_options, get_countries,
@@ -141,6 +141,14 @@ class AuthorisedRepresentativeComponent(SectionComponent):
                 min_value=datetime.date.today() + datetime.timedelta(days=1),
                 help="Must be a future date")
         
+        # Document Upload Section (for Foreign ID and Passport only)
+        if id_type in ["Foreign ID Number", "Foreign Passport Number"]:
+            st.markdown("**Document Upload**")
+            st.info("📎 **Document Upload Guidelines**: Please ensure your total attachment size does not exceed 25MB, otherwise the submission may fail.")
+            doc_label = "ID Document" if id_type == "Foreign ID Number" else "Passport Document"
+            persist_file_uploader(doc_label,
+                inst_key(ns, instance_id, "id_document"))
+        
         # Contact Information Section
         st.markdown("**Contact Information**")
         col1, col2 = st.columns(2)
@@ -254,6 +262,13 @@ class AuthorisedRepresentativeComponent(SectionComponent):
             if not passport_expiry or not _is_future_date(passport_expiry):
                 errs.append(f"{prefix} Passport Expiry Date must be a future date.")
         
+        # Document upload validation for Foreign ID and Foreign Passport
+        if id_type in ["Foreign ID Number", "Foreign Passport Number"]:
+            id_doc = st.session_state.get(inst_key(ns, instance_id, "id_document"))
+            if not id_doc:
+                doc_type = "ID Document" if id_type == "Foreign ID Number" else "Passport Document"
+                errs.append(f"{prefix} {doc_type} upload is required for {id_type}.")
+        
         # Contact information validation
         email = st.session_state.get(inst_key(ns, instance_id, "email"), "")
         if not _is_valid_email(email):
@@ -312,8 +327,13 @@ class AuthorisedRepresentativeComponent(SectionComponent):
         if isinstance(passport_expiry, datetime.date):
             data["Passport Expiry"] = passport_expiry.strftime("%Y/%m/%d")
         
-        # No file uploads for this component
+        # Handle file uploads for Foreign ID and Foreign Passport
         uploads = []
+        id_type = data["Identification Type"]
+        if id_type in ["Foreign ID Number", "Foreign Passport Number"]:
+            id_doc = st.session_state.get(inst_key(ns, instance_id, "id_document"))
+            if id_doc:
+                uploads.append(id_doc)
         
         return data, uploads
 
@@ -334,15 +354,13 @@ class AuthorisedRepresentativeComponent(SectionComponent):
         # Get existing payload (reuse existing serialization logic)
         payload, uploads = self.serialize(ns=ns, instance_id=instance_id, **config)
         
-        # Add attachments with enhanced metadata
-        # Note: Current AuthorisedRepresentativeComponent doesn't have file uploads in the render method,
-        # but this prepares for future enhancement or if uploads are added
-        for upload in uploads:
-            if upload:
-                # Determine document type based on context
+        # Add attachments with enhanced metadata for Foreign ID and Foreign Passport
+        if id_type in ["Foreign ID Number", "Foreign Passport Number"]:
+            id_doc = st.session_state.get(inst_key(ns, instance_id, "id_document"))
+            if id_doc:
                 doc_type = get_document_type_from_id_type(id_type)
                 attachment_collector.add_attachment(
-                    file=upload,
+                    file=id_doc,
                     section_title=section_title,
                     document_type=doc_type,
                     person_identifier=person_identifier
