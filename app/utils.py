@@ -34,7 +34,7 @@ def initialize_state():
     if 'state_initialized' not in st.session_state:
         
         # Calculate favicon path once and store it
-        favicon_path = Path(__file__).resolve().parent.parent / "assets" / "logos" / "favicon.svg"
+        favicon_path = Path(__file__).resolve().parent.parent / "assets" / "logos" / "favicon.png"
         
         # Define all default values in a dictionary
         defaults = {

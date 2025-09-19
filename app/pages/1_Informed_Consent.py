@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime
 
 # --- PAGE CONFIG ---
-favicon_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "favicon.svg"
+favicon_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "favicon.png"
 st.set_page_config(
     page_title="Informed Consent - Research Study",
     page_icon=str(favicon_path),

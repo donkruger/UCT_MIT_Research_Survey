@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # --- PAGE CONFIG ---
-favicon_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "favicon.svg"
+favicon_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "favicon.png"
 st.set_page_config(
     page_title="Review & Submit - Research Survey",
     page_icon=str(favicon_path),

@@ -188,10 +188,13 @@ def render_sidebar():
     }
     
     .logo-icon img {
-        width: 60px;
-        height: 60px;
+        width: 150px;
+        height: 150px;
         object-fit: contain;
-        filter: brightness(0) invert(1);
+        filter: brightness(1.2) contrast(1.1);
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        padding: 2px;
     }
     
     .logo-text {
@@ -325,7 +328,7 @@ def render_sidebar():
                     <img src="data:image/png;base64,{}" alt="UCT Logo">
                 </div>
                 <h2 class="logo-title">UCT Research</h2>
-                <p class="logo-subtitle">Decision-Making Study</p>
+                <p class="logo-subtitle">Design Science Study</p>
             </div>
         </div>
         """.format(_get_logo_base64()), unsafe_allow_html=True)
