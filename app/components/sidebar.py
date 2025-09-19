@@ -421,32 +421,3 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
         
-        # Study information
-        with st.expander("UCT Research Study"):
-            st.markdown("""
-            **University of Cape Town**  
-            Department of Information Systems
-            
-            **Research Focus**
-            
-            Evaluating user experiences with AI-driven financial advisory systems:
-            
-            • **Multi-Agent AI Systems** - Team-based AI recommendations  
-            • **Transparency & Trust** - Understanding AI decision-making  
-            • **Usability & Clarity** - User interface effectiveness  
-            • **Ethical Considerations** - Responsible AI implementation  
-            
-            **Research Ethics**
-            
-            ✓ Informed consent required  
-            ✓ Anonymous & confidential responses  
-            ✓ Academic research purposes only  
-            ✓ Voluntary participation  
-            ✓ Right to withdraw anytime  
-            
-            **Contact Researcher**
-            
-            Don Kruger  
-            📧 don@easyequities.co.za  
-            📞 +27-84-555-3333
-            """)
