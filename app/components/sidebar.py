@@ -121,69 +121,10 @@ def render_sidebar():
         color: rgba(255, 255, 255, 0.95) !important;
     }
     
-    /* Expander styling - ONLY for sidebar */
-    [data-testid="stSidebar"] .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
-        color: white !important;
-        font-weight: 500 !important;
-    }
+    /* Expander styling removed to prevent interference with main content */
     
-    [data-testid="stSidebar"] .streamlit-expanderContent {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 0 0 12px 12px !important;
-        padding: 1rem !important;
-    }
+    /* All expander custom styling removed to use Streamlit defaults */
     
-    /* Ensure main content expanders have light backgrounds - More specific selectors */
-    .stApp .main .streamlit-expanderHeader,
-    [data-testid="stMain"] .streamlit-expanderHeader,
-    .main .element-container .streamlit-expanderHeader,
-    div:not([data-testid="stSidebar"]) .streamlit-expanderHeader {
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-        color: #1e293b !important;
-        font-weight: 500 !important;
-    }
-    
-    .stApp .main .streamlit-expanderContent,
-    [data-testid="stMain"] .streamlit-expanderContent,
-    .main .element-container .streamlit-expanderContent,
-    div:not([data-testid="stSidebar"]) .streamlit-expanderContent {
-        background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 0 0 8px 8px !important;
-        padding: 1rem !important;
-    }
-    
-    /* Override any gradient backgrounds on main content expanders - Nuclear option */
-    .stApp .main .streamlit-expanderHeader,
-    [data-testid="stMain"] .streamlit-expanderHeader,
-    .main .streamlit-expanderHeader,
-    .element-container .streamlit-expanderHeader,
-    .block-container .streamlit-expanderHeader {
-        background-image: none !important;
-        background: #f8fafc !important;
-        background-color: #f8fafc !important;
-    }
-    
-    /* Force override Streamlit's default expander styling */
-    .streamlit-expanderHeader:not([data-testid="stSidebar"] .streamlit-expanderHeader) {
-        background: #f8fafc !important;
-        background-image: none !important;
-        background-color: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        color: #1e293b !important;
-    }
-    
-    .streamlit-expanderContent:not([data-testid="stSidebar"] .streamlit-expanderContent) {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-    }
     
     /* Animations */
     @keyframes pulse {
