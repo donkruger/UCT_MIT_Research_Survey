@@ -121,7 +121,7 @@ def render_sidebar():
         color: rgba(255, 255, 255, 0.95) !important;
     }
     
-    /* Expander styling */
+    /* Expander styling - ONLY for sidebar */
     [data-testid="stSidebar"] .streamlit-expanderHeader {
         background: rgba(255, 255, 255, 0.05) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -134,6 +134,22 @@ def render_sidebar():
         background: rgba(255, 255, 255, 0.03) !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         border-radius: 0 0 12px 12px !important;
+        padding: 1rem !important;
+    }
+    
+    /* Ensure main content expanders have light backgrounds */
+    .main .streamlit-expanderHeader {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        color: #1e293b !important;
+        font-weight: 500 !important;
+    }
+    
+    .main .streamlit-expanderContent {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 0 0 8px 8px !important;
         padding: 1rem !important;
     }
     
