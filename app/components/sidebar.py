@@ -125,6 +125,23 @@ def render_sidebar():
     
     /* All expander custom styling removed to use Streamlit defaults */
     
+    /* Override gradient on expander headers - remove or reverse the blue to white gradient */
+    .streamlit-expanderHeader {
+        background: #4a5fb8 !important;  /* Solid blue instead of gradient */
+        background-image: none !important;  /* Remove any gradient */
+    }
+    
+    /* Alternative: Reverse the gradient direction (white to blue instead of blue to white) */
+    .streamlit-expanderHeader[class*="st-emotion-cache"] {
+        background: linear-gradient(90deg, #6b7ec8 0%, #4a5fb8 100%) !important;  /* Reversed: lighter to darker */
+    }
+    
+    /* Ensure text is white on the new backgrounds */
+    .streamlit-expanderHeader,
+    .streamlit-expanderHeader * {
+        color: white !important;
+    }
+    
     /* Specific targeting for survey section headers by text content */
     /* This ensures white text on dark backgrounds for these specific sections */
     .streamlit-expanderHeader:has(svg):has(div:contains("Research Questionnaire Instructions")),
