@@ -1,164 +1,314 @@
-# app/components/sidebar.py
+"""
+Sidebar component for the Research Survey Application with premium UI/UX design.
+"""
 
+import base64
 from pathlib import Path
 import streamlit as st
 from app.utils import svg_image_html
 
+def _get_logo_base64():
+    """Get the UCT logo as base64 encoded string."""
+    try:
+        logo_path = Path(__file__).parent.parent.parent / "assets" / "logos" / "UCT_logo.png"
+        with open(logo_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception as e:
+        # Fallback to empty string if logo not found
+        st.warning(f"Could not load UCT logo: {e}")
+        return ""
+
 def render_sidebar():
-    """Renders the sidebar with custom page navigation."""
-    # CSS to hide native Streamlit page navigation
-    hide_native_nav_css = """
+    """Renders the sidebar with modern, sophisticated design."""
+    
+    # Premium sidebar styling with glassmorphism effect
+    sidebar_bg_css = """
     <style>
     /* Hide native Streamlit page navigation */
     [data-testid="stSidebarNav"] {
         display: none !important;
     }
-    </style>
-    """
-    st.markdown(hide_native_nav_css, unsafe_allow_html=True)
     
-    # Sidebar styling: background, z-index positioning, and mobile view fixes
-    # Includes dark-mode friendly variant via prefers-color-scheme
-    sidebar_bg_css = """
-    <style>
-    [data-testid=\"stSidebar\"],
-    [data-testid=\"stSidebar\"] > div:first-child {
-        background: linear-gradient(135deg, #f5fbff 0%, #eaf6ff 100%) !important;
-        background-color: #f5fbff !important;
+    /* Custom scrollbar for sidebar */
+    [data-testid="stSidebar"]::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    [data-testid="stSidebar"]::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-testid="stSidebar"]::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+    
+    [data-testid="stSidebar"]::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Sidebar background with glassmorphism */
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"] > div:first-child {
+        background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
         opacity: 1 !important;
         z-index: 999999 !important;
         position: relative !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* Ensure sidebar content appears above main content */
-    [data-testid=\"stSidebar\"] .css-1d391kg,
-    [data-testid=\"stSidebar\"] .stVerticalBlock,
-    [data-testid=\"stSidebar\"] > div {
-        z-index: 999999 !important;
+    /* Glass effect overlay */
+    [data-testid="stSidebar"]::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(30, 64, 175, 0.1) 0%, 
+            rgba(59, 130, 246, 0.1) 100%);
+        pointer-events: none;
+        z-index: 1;
     }
     
-    /* Ensure main content area stays behind sidebar */
-    .main .block-container,
-    [data-testid=\"stMain\"],
-    [data-testid=\"stMain\"] .main,
-    [data-testid=\"stMain\"] .block-container {
-        z-index: 1 !important;
-        position: relative !important;
+    /* Content above glass effect */
+    [data-testid="stSidebar"] > div {
+        position: relative;
+        z-index: 2;
     }
     
-    /* Ensure custom HTML elements stay behind sidebar */
-    .getting-started-card,
-    .progress-warning,
-    div[style*="background:"],
-    div[style*="background-color:"] {
-        z-index: 1 !important;
-        position: relative !important;
-    }
-    
-    /* Make sidebar navigation text white - comprehensive targeting */
+    /* Navigation link styling */
     [data-testid="stSidebar"] a,
-    [data-testid="stSidebar"] a *,
-    [data-testid="stSidebar"] a p,
-    [data-testid="stSidebar"] a span,
-    [data-testid="stSidebar"] a div,
-    [data-testid="stSidebar"] .stPageLink-NavLink,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"],
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] *,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] p,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] span,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"] div,
-    [data-testid="stSidebar"] div[data-testid="stPageLink-NavLink"],
-    [data-testid="stSidebar"] div[data-testid="stPageLink-NavLink"] *,
-    [data-testid="stSidebar"] div[data-testid="stPageLink-NavLink"] p,
-    [data-testid="stSidebar"] div[data-testid="stPageLink-NavLink"] span,
-    [data-testid="stSidebar"] .st-emotion-cache-1rtdyuf,
-    [data-testid="stSidebar"] .st-emotion-cache-1rtdyuf *,
-    [data-testid="stSidebar"] .st-emotion-cache-1rtdyuf p,
-    [data-testid="stSidebar"] button[kind="pageLink"],
-    [data-testid="stSidebar"] button[kind="pageLink"] *,
-    [data-testid="stSidebar"] button[kind="pageLink"] p,
-    [data-testid="stSidebar"] button[kind="pageLink"] span,
-    [data-testid="stSidebar"] button[kind="pageLink"] div,
-    [data-testid="stSidebar"] .stButton > button,
-    [data-testid="stSidebar"] .stButton > button *,
-    [data-testid="stSidebar"] .stButton > button p,
-    [data-testid="stSidebar"] .stButton > button span {
-        color: white !important;
+    [data-testid="stSidebar"] .stButton > button {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        margin: 0.5rem 0 !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+        font-weight: 500 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        backdrop-filter: blur(10px) !important;
         text-decoration: none !important;
+        display: block !important;
     }
     
-    /* Hover effects for sidebar navigation */
     [data-testid="stSidebar"] a:hover,
-    [data-testid="stSidebar"] a:hover *,
-    [data-testid="stSidebar"] .stPageLink-NavLink:hover,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"]:hover,
-    [data-testid="stSidebar"] [data-testid="stPageLink-NavLink"]:hover *,
-    [data-testid="stSidebar"] button[kind="pageLink"]:hover,
-    [data-testid="stSidebar"] button[kind="pageLink"]:hover *,
-    [data-testid="stSidebar"] .stButton > button:hover,
-    [data-testid="stSidebar"] .stButton > button:hover * {
-        color: #e0f4ff !important;
-        text-decoration: none !important;
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        transform: translateX(4px) !important;
+        box-shadow: 0 4px 12px rgba(74, 105, 255, 0.2) !important;
     }
     
-    /* Universal sidebar text color override - catch-all approach */
-    [data-testid="stSidebar"] * {
-        color: white !important;
+    /* Active page indicator */
+    [data-testid="stSidebar"] a[aria-current="page"] {
+        background: linear-gradient(135deg, 
+            rgba(74, 105, 255, 0.3) 0%, 
+            rgba(139, 92, 246, 0.3) 100%) !important;
+        border-color: rgba(74, 105, 255, 0.5) !important;
+        box-shadow: 0 0 20px rgba(74, 105, 255, 0.2) !important;
     }
     
-    /* Ensure sidebar text elements are visible */
+    /* Text color consistency */
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] button,
     [data-testid="stSidebar"] label {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+    
+    /* Expander styling */
+    [data-testid="stSidebar"] .streamlit-expanderHeader {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
         color: white !important;
+        font-weight: 500 !important;
     }
     
-    /* Mobile view specific fixes */
+    [data-testid="stSidebar"] .streamlit-expanderContent {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 0 0 12px 12px !important;
+        padding: 1rem !important;
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    
+    /* Logo container */
+    .sidebar-logo {
+        text-align: center;
+        padding: 2rem 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .logo-bg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(74, 105, 255, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 3s ease-in-out infinite;
+    }
+    
+    .logo-content {
+        position: relative;
+        z-index: 2;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .logo-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(30, 64, 175, 0.3);
+        overflow: hidden;
+    }
+    
+    .logo-icon img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+    }
+    
+    .logo-text {
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .logo-title {
+        color: white;
+        font-size: 1.25rem;
+        margin: 0.5rem 0 0.25rem 0;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+    
+    .logo-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    /* Progress tracker */
+    .progress-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.875rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+    }
+    
+    .progress-bar {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        height: 6px;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+        height: 100%;
+        border-radius: 8px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px rgba(30, 64, 175, 0.5);
+    }
+    
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .progress-step {
+        text-align: center;
+        flex: 0 0 auto;
+        min-width: 60px;
+    }
+    
+    .step-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        margin: 0 auto 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid;
+    }
+    
+    .step-circle.active {
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        border-color: #1e40af;
+    }
+    
+    .step-circle.inactive {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .step-number {
+        color: white;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .step-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.7rem;
+    }
+    
+    .step-connector {
+        height: 2px;
+        flex: 1;
+        margin: 0 0.25rem 1rem;
+        min-width: 20px;
+    }
+    
+    .step-connector.active {
+        background: linear-gradient(90deg, #1e40af, #3b82f6);
+    }
+    
+    .step-connector.inactive {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Mobile responsiveness */
     @media (max-width: 768px) {
-        [data-testid=\"stSidebar\"] {
-            z-index: 999999 !important;
-            position: fixed !important;
-        }
-        
-        /* Ensure sidebar overlay works properly on mobile */
-        [data-testid=\"stSidebar\"][aria-expanded=\"true\"] {
-            z-index: 999999 !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            height: 100vh !important;
-            width: 100% !important;
-            max-width: 21rem !important;
-            background: linear-gradient(135deg, #f5fbff 0%, #eaf6ff 100%) !important;
-            background-color: #f5fbff !important;
-            opacity: 1 !important;
-        }
-        
-        /* Mobile dark mode sidebar */
-        @media (prefers-color-scheme: dark) {
-            [data-testid=\"stSidebar\"][aria-expanded=\"true\"] {
-                background: linear-gradient(135deg, rgba(15, 188, 227, 0.95) 0%, rgba(60, 102, 164, 0.95) 100%) !important;
-                background-color: rgba(30, 39, 46, 0.95) !important;
-            }
-        }
-        
-        /* Ensure main content is properly layered on mobile */
-        .main .block-container,
-        [data-testid=\"stMain\"] {
-            z-index: 1 !important;
-            position: relative !important;
-        }
-    }
-    
-    @media (prefers-color-scheme: dark) {
-      [data-testid=\"stSidebar\"],
-      [data-testid=\"stSidebar\"] > div:first-child {
-          background: linear-gradient(135deg, rgba(15, 188, 227, 0.95) 0%, rgba(60, 102, 164, 0.95) 100%) !important;
-          background-color: rgba(30, 39, 46, 0.95) !important;
-          opacity: 1 !important;
-          z-index: 999999 !important;
+        [data-testid="stSidebar"] {
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3) !important;
       }
     }
     </style>
@@ -166,15 +316,121 @@ def render_sidebar():
     st.markdown(sidebar_bg_css, unsafe_allow_html=True)
     
     with st.sidebar:
-        # Logo at the top of sidebar
-        logo_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "stx_svg.svg"
-        if logo_path.exists():
-            st.image(str(logo_path), width=240)
+        # Logo section using CSS classes
+        st.markdown("""
+        <div class="sidebar-logo">
+            <div class="logo-bg"></div>
+            <div class="logo-content">
+                <div class="logo-icon">
+                    <img src="data:image/png;base64,{}" alt="UCT Logo">
+                </div>
+                <h2 class="logo-title">UCT Research</h2>
+                <p class="logo-subtitle">Decision-Making Study</p>
+            </div>
+        </div>
+        """.format(_get_logo_base64()), unsafe_allow_html=True)
         
-        st.markdown("---")
+        # Divider
+        st.markdown('<hr style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); margin: 1.5rem 0;">', unsafe_allow_html=True)
         
-        # Custom page navigation with proper labels and icons
-        # Paths must be relative to the app directory
-        st.page_link('main.py', label='Capture Info')
-        st.page_link('pages/1_AI_Assistance.py', label='AI Assistance', icon='🤖')
-        st.page_link('pages/3_Declaration_and_Submit.py', label='Declaration & Submit') 
+        # Navigation section
+        st.markdown("""
+        <div style="padding: 0 0.5rem;">
+            <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; font-weight: 600;">Navigation</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Navigation links
+        st.page_link('pages/1_Informed_Consent.py', label='📋 Informed Consent')
+        st.page_link('main.py', label='📊 Research Questionnaire')
+        st.page_link('pages/3_Declaration_and_Submit.py', label='✓ Review & Submit')
+        
+        # Divider
+        st.markdown('<hr style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); margin: 1.5rem 0;">', unsafe_allow_html=True)
+        
+        # Progress tracker with 3 steps: Consent → Questionnaire → Submit
+        current_page = st.session_state.get("current_page", "consent")
+        consent_given = st.session_state.get("consent_given", False)
+        
+        # Determine progress based on current state
+        if not consent_given:
+            progress = 0.0  # No consent yet
+        elif current_page == "main" or consent_given:
+            progress = 0.5  # Consent given, on questionnaire
+        else:
+            progress = 1.0  # On submit page
+            
+        # Check if we're on submit page
+        if "3_Declaration_and_Submit" in str(st.session_state.get("current_page", "")):
+            progress = 1.0
+            
+        progress_width = int(progress * 100)
+        
+        # Determine step classes for 3-step process
+        step1_class = "active" if consent_given else "inactive"  # Consent
+        step2_class = "active" if progress >= 0.5 else "inactive"  # Questionnaire
+        step3_class = "active" if progress >= 1.0 else "inactive"  # Submit
+        
+        connector1_class = "active" if progress >= 0.5 else "inactive"  # Consent → Questionnaire
+        connector2_class = "active" if progress >= 1.0 else "inactive"  # Questionnaire → Submit
+        
+        st.markdown(f"""
+        <div class="progress-card">
+            <p class="progress-title">Progress Tracker</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {progress_width}%;"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="progress-step">
+                    <div class="step-circle {step1_class}">
+                        <span class="step-number">1</span>
+                    </div>
+                    <small class="step-label">Consent</small>
+                </div>
+                <div class="step-connector {connector1_class}"></div>
+                <div class="progress-step">
+                    <div class="step-circle {step2_class}">
+                        <span class="step-number">2</span>
+                    </div>
+                    <small class="step-label">Survey</small>
+                </div>
+                <div class="step-connector {connector2_class}"></div>
+                <div class="progress-step">
+                    <div class="step-circle {step3_class}">
+                        <span class="step-number">3</span>
+                    </div>
+                    <small class="step-label">Submit</small>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Study information
+        with st.expander("UCT Research Study"):
+            st.markdown("""
+            **University of Cape Town**  
+            Department of Information Systems
+            
+            **Research Focus**
+            
+            Evaluating user experiences with AI-driven financial advisory systems:
+            
+            • **Multi-Agent AI Systems** - Team-based AI recommendations  
+            • **Transparency & Trust** - Understanding AI decision-making  
+            • **Usability & Clarity** - User interface effectiveness  
+            • **Ethical Considerations** - Responsible AI implementation  
+            
+            **Research Ethics**
+            
+            ✓ Informed consent required  
+            ✓ Anonymous & confidential responses  
+            ✓ Academic research purposes only  
+            ✓ Voluntary participation  
+            ✓ Right to withdraw anytime  
+            
+            **Contact Researcher**
+            
+            Don Kruger  
+            📧 don@easyequities.co.za  
+            📞 +27-84-555-3333
+            """)

@@ -1,8 +1,14 @@
 [theme]
-primaryColor = "#0fbce3"
+primaryColor = "#1e3ea2"
 base = "light"
 
 [server]
 enableCORS = false
 enableXsrfProtection = false
 maxUploadSize = 4
+
+[client]
+showErrorDetails = false
+
+[global]
+developmentMode = false

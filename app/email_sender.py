@@ -1,4 +1,8 @@
-# app/email_sender.py
+"""
+Email sending functionality for the Research Survey Application.
+
+This module handles sending survey submissions via email with attachments.
+"""
 
 import streamlit as st
 import smtplib
@@ -6,15 +10,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-from typing import List, Dict, Any, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from app.attachment_metadata import AttachmentCollector
+from typing import List, Dict, Any, Optional
+import datetime
 
 def format_feedback_section(feedback_data: Dict[str, Any]) -> str:
     """Format feedback data for email inclusion."""
     section = "--- USER FEEDBACK ---\n"
-    section += f"Entity: {feedback_data.get('entity_name', 'N/A')}\n"
+    section += f"Survey: {feedback_data.get('survey_name', 'N/A')}\n"
     section += f"Email: {feedback_data.get('email', 'N/A')}\n"
     section += f"Category: {feedback_data.get('category', 'N/A')}\n"
     section += f"Satisfaction: {feedback_data.get('satisfaction_rating', 'N/A')}/5\n"
@@ -22,12 +24,19 @@ def format_feedback_section(feedback_data: Dict[str, Any]) -> str:
     section += "--- END FEEDBACK ---\n\n"
     return section
 
-def send_submission_email_with_metadata(
+def send_submission_email(
     answers: Dict[str, Any],
-    attachment_collector: 'AttachmentCollector',
+    uploaded_files: List[Optional[st.runtime.uploaded_file_manager.UploadedFile]],
     feedback_data: Optional[Dict[str, Any]] = None
 ):
-    """Enhanced email sending with properly named attachments."""
+    """
+    Send survey submission via email with PDF summary and any uploaded files.
+    
+    Args:
+        answers: Complete survey submission data
+        uploaded_files: List of uploaded documents (if any)
+        feedback_data: Optional feedback data from user
+    """
     
     try:
         # --- Credentials ---
@@ -35,70 +44,57 @@ def send_submission_email_with_metadata(
             sender_email = st.secrets["email_credentials"]["email_address"]
             sender_password = st.secrets["email_credentials"]["app_password"]
         except KeyError as ke:
-            st.error(f"❌ Missing email credentials in secrets.toml: {ke}")
+            st.error(f"Missing email credentials in secrets.toml: {ke}")
+            st.error("Please configure email_credentials.email_address and email_credentials.app_password")
             return
         
-        # --- Set the recipient email address here ---
-        # In dev mode, allow configurable email; otherwise use default production email
+        # --- Set the recipient email address ---
+        # Default recipient email
+        DEFAULT_RECIPIENT = "don.kruger123@gmail.com"
+        
+        # In dev mode, allow configurable email; otherwise use default
         if st.session_state.get("dev_mode", False):
             # Dev mode: Allow user to configure email or use default
-            dev_email = st.session_state.get("dev_recipient_email", "jpearse@purplegroup.co.za")
+            dev_email = st.session_state.get("dev_recipient_email", DEFAULT_RECIPIENT)
             recipient_email = dev_email
         else:
-            # Production mode: Always use default email
-            recipient_email = "jpearse@purplegroup.co.za"
+            # Production mode: Use default or from secrets if available
+            try:
+                recipient_email = st.secrets["email_credentials"].get("recipient_address", DEFAULT_RECIPIENT)
+            except:
+                recipient_email = DEFAULT_RECIPIENT
 
-        # --- Extract Entity Information ---
-        entity_user_id = answers.get("Entity User ID", "Unknown")
+        # --- Extract Survey Information ---
+        survey_type = answers.get("Survey Type", "Unknown Survey")
         
-        # Extract entity name from the correct path in the data structure
-        entity_name = "Unknown Entity"
-        entity_details = answers.get("Entity Details", {})
-        if entity_details:
-            # Try common field names for entity name
-            entity_name = (entity_details.get("Legal / Registered Name") or 
-                          entity_details.get("Entity Name") or 
-                          entity_details.get("Trust Name") or
-                          entity_details.get("Partnership Name") or
-                          entity_details.get("CC Registered Name") or
-                          st.session_state.get("entity_display_name", "Unknown Entity"))
-        
-        entity_type = st.session_state.get("entity_type", "Unknown Type")
+        # Extract informed consent signer name
+        declaration_info = answers.get("Declaration", {})
+        consent_signer = declaration_info.get("Informed Consent Signed By", "Anonymous")
         
         # --- Email Content ---
-        subject = f"New Entity Onboarding Submission: {entity_name} ({entity_type})"
+        subject = f"New Survey Submission: {survey_type}"
 
-        body = f"A new Entity Onboarding form has been submitted for processing.\n\n"
-        body += f"Entity Details:\n"
-        body += f"• Entity Name: {entity_name}\n"
-        body += f"• Entity Type: {entity_type}\n"
-        body += f"• Entity User ID: {entity_user_id}\n\n"
-        body += f"Please find the complete Entity Onboarding PDF summary, machine-readable CSV data file, and all supporting documents attached.\n\n"
-        body += f"This submission includes:\n"
-        body += f"• PDF Summary: Human-readable formatted summary of all form data\n"
-        body += f"• CSV Data File: Machine-readable structured data for processing systems\n"
-        body += f"• Entity details and registration information\n"
-        body += f"• Physical address details\n"
-        body += f"• Contact information\n"
-        body += f"• Natural persons information (Directors, Members, Trustees, etc.)\n"
-        body += f"• ID/Passport documentation\n"
-        body += f"• Declaration and signatory information\n\n"
+        body = f"A new survey has been submitted for review.\n\n"
+        body += f"Survey Details:\n"
+        body += f"• Survey Type: {survey_type}\n"
+        body += f"• Informed Consent Signed By: {consent_signer}\n"
+        body += f"• Submission Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         
-        # Add enhanced attachment summary
-        attachments = attachment_collector.get_attachments_for_email()
-        if attachments:
-            body += f"Enhanced Attachments ({len(attachments)} files with descriptive names):\n"
-            for att in attachments:
-                body += f"• {att.generate_filename()}\n"
-            body += "\n"
+        body += f"Please find the complete survey response attached as a PDF.\n"
+        
+        if uploaded_files and any(f is not None for f in uploaded_files):
+            count = sum(1 for f in uploaded_files if f is not None)
+            body += f"This submission includes {count} additional file(s).\n"
+        
+        # Add CSV note if available
+        body += f"A CSV data file is also attached for data processing.\n\n"
         
         # Add feedback section if provided
         if feedback_data and feedback_data.get('submitted'):
             body += format_feedback_section(feedback_data)
         
         body += f"Regards,\n"
-        body += f"Entity Onboarding System\n"
-        body += f"Satrix Asset Management"
+        body += f"Research Survey System"
 
         # --- Create the Email Message ---
         msg = MIMEMultipart()
@@ -108,28 +104,38 @@ def send_submission_email_with_metadata(
         msg.attach(MIMEText(body, "plain"))
 
         # --- Create standardized filenames ---
-        safe_entity_name = entity_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
-        timestamp = __import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')
-        base_filename = f"Entity_Onboarding_{safe_entity_name}_{timestamp}"
+        safe_survey_name = survey_type.replace(' ', '_').replace('/', '_').replace('\\', '_')
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        base_filename = f"Survey_{safe_survey_name}_{timestamp}"
 
         # --- Attach PDF Summary ---
-        from app.pdf_generator import make_pdf
-        pdf_bytes = make_pdf(answers)
-        pdf_part = MIMEBase("application", "octet-stream")
-        pdf_part.set_payload(pdf_bytes)
-        encoders.encode_base64(pdf_part)
-        pdf_part.add_header(
-            "Content-Disposition",
-            f"attachment; filename={base_filename}.pdf",
-        )
-        msg.attach(pdf_part)
-
-        # --- NEW: Attach CSV Data File ---
         try:
-            from app.csv_generator import make_csv
-            csv_string = make_csv(answers)
+            from app.pdf_generator import make_pdf
+            pdf_bytes = make_pdf(answers)
+            pdf_part = MIMEBase("application", "octet-stream")
+            pdf_part.set_payload(pdf_bytes)
+            encoders.encode_base64(pdf_part)
+            pdf_part.add_header(
+                "Content-Disposition",
+                f"attachment; filename={base_filename}.pdf",
+            )
+            msg.attach(pdf_part)
+        except Exception as pdf_error:
+            st.error(f"Could not generate PDF: {pdf_error}")
+            # Continue without PDF
+
+        # --- Attach CSV Data File ---
+        try:
+            # Check if this is an investment research survey
+            if survey_type == "Investment Decision-Making Research Survey":
+                from app.csv_generator import make_investment_research_csv
+                csv_string = make_investment_research_csv(answers)
+            else:
+                from app.csv_generator import make_csv
+                csv_string = make_csv(answers)
+            
             csv_part = MIMEBase("application", "octet-stream")
-            csv_part.set_payload(csv_string.encode("utf-8"))  # Encode the string to bytes
+            csv_part.set_payload(csv_string.encode("utf-8"))
             encoders.encode_base64(csv_part)
             csv_part.add_header(
                 "Content-Disposition",
@@ -137,82 +143,71 @@ def send_submission_email_with_metadata(
             )
             msg.attach(csv_part)
         except Exception as csv_error:
-            st.warning(f"⚠️ Could not generate CSV file: {csv_error}")
-            # Continue without CSV attachment
+            # CSV generator might not be available
+            pass
 
-        # --- Attach User Uploaded Files with Enhanced Names ---
-        for attachment_metadata in attachments:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment_metadata.file.getvalue())
-            encoders.encode_base64(part)
-            
-            # Use enhanced filename
-            enhanced_filename = attachment_metadata.generate_filename()
-            
-            part.add_header(
-                "Content-Disposition",
-                f"attachment; filename={enhanced_filename}",
-            )
-            msg.attach(part)
+        # --- Attach User Uploaded Files ---
+        if uploaded_files:
+            for i, uploaded_file in enumerate(uploaded_files):
+                if uploaded_file is not None:
+                    part = MIMEBase("application", "octet-stream")
+                    part.set_payload(uploaded_file.getvalue())
+                    encoders.encode_base64(part)
+                    
+                    # Use original filename or create a generic one
+                    filename = uploaded_file.name or f"attachment_{i+1}"
+                    
+                    part.add_header(
+                        "Content-Disposition",
+                        f"attachment; filename={filename}",
+                    )
+                    msg.attach(part)
 
         # --- Send the Email ---
-        # Note: Ensure the sender email is configured for SMTP access.
-        # For Gmail/Google Workspace accounts, use smtp.gmail.com
-        # For other providers, update the SMTP server address accordingly.
-        st.info(f"📧 Attempting to send email to: {recipient_email}")
+        st.info(f"Sending survey submission to: {recipient_email}")
         
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        # Determine SMTP server from sender email
+        if "gmail.com" in sender_email or "google" in sender_email.lower():
+            smtp_server = "smtp.gmail.com"
+        elif "outlook" in sender_email or "hotmail" in sender_email:
+            smtp_server = "smtp-mail.outlook.com"
+        elif "yahoo" in sender_email:
+            smtp_server = "smtp.mail.yahoo.com"
+        else:
+            # Default to Gmail (can be overridden in secrets)
+            smtp_server = st.secrets.get("email_credentials", {}).get("smtp_server", "smtp.gmail.com")
+        
+        with smtplib.SMTP_SSL(smtp_server, 465) as server:
             server.login(sender_email, sender_password)
             server.send_message(msg)
-            st.info("📧 Email sent successfully via SMTP")
         
-        st.success(f"✅ Entity Onboarding submission sent successfully!")
-        st.info(f"📧 Email sent to: {recipient_email}")
-        st.info(f"📎 PDF Summary: {base_filename}.pdf")
-        st.info(f"📊 CSV Data File: {base_filename}.csv")
+        st.success(f"Survey submission sent successfully!")
+        st.info(f"Email sent to: {recipient_email}")
+        st.info(f"Attachments: {base_filename}.pdf, {base_filename}.csv")
         
-        # Enhanced attachment logging
-        if attachments:
-            st.info(f"📎 Enhanced Attachments: {len(attachments)} file(s) with descriptive names")
-            for att in attachments[:5]:  # Show first 5 for brevity
-                st.info(f"  • {att.generate_filename()}")
-            if len(attachments) > 5:
-                st.info(f"  • ... and {len(attachments) - 5} more")
+        if uploaded_files and any(f is not None for f in uploaded_files):
+            count = sum(1 for f in uploaded_files if f is not None)
+            st.info(f"Additional files: {count} file(s)")
 
     except Exception as e:
-        st.error(f"❌ Failed to send Entity Onboarding submission email: {e}")
+        st.error(f"Failed to send survey submission email: {e}")
         st.error("Please check your email configuration in .streamlit/secrets.toml and try again.")
-
-
-def send_submission_email(
-    answers: Dict[str, Any],
-    uploaded_files: List[Optional[st.runtime.uploaded_file_manager.UploadedFile]]
-):
-    """
-    Backward compatibility wrapper for legacy email sending.
-    
-    Args:
-        answers: Complete form submission data including entity details and all sections
-        uploaded_files: List of uploaded documents (ID/Passport copies, etc.)
-    """
-    # Check if answers has an attachment collector (from enhanced serialization)
-    if hasattr(answers, '_attachment_collector'):
-        # Use enhanced email sending
-        attachment_collector = answers._attachment_collector
-        send_submission_email_with_metadata(answers, attachment_collector)
-        return
-    
-    # Create basic attachment collector for legacy calls
-    from app.attachment_metadata import AttachmentCollector
-    attachment_collector = AttachmentCollector()
-    
-    for i, file in enumerate(uploaded_files or []):
-        if file:
-            attachment_collector.add_attachment(
-                file=file,
-                section_title="Legacy_Upload",
-                document_type="Document",
-                person_identifier=f"Upload_{i+1}"
-            )
-    
-    send_submission_email_with_metadata(answers, attachment_collector)
+        
+        # Provide helpful configuration instructions
+        with st.expander("Email Configuration Help"):
+            st.markdown("""
+            To configure email sending, create or update `.streamlit/secrets.toml`:
+            
+            ```toml
+            [email_credentials]
+            email_address = "your-email@gmail.com"
+            app_password = "your-app-password"
+            recipient_address = "don.kruger123@gmail.com"  # Optional, defaults to don.kruger123@gmail.com
+            smtp_server = "smtp.gmail.com"  # Optional, auto-detected from sender email
+            ```
+            
+            **For Gmail:**
+            1. Enable 2-factor authentication
+            2. Generate an app password at https://myaccount.google.com/apppasswords
+            3. Use the app password (not your regular password) in the config
+            """)

@@ -1,4 +1,14 @@
-streamlit
-reportlab 
-google-generativeai
-streamlit-lottie
+# Research Survey Template - Python Dependencies
+
+# Core framework
+streamlit>=1.28.0
+
+# PDF generation
+reportlab>=4.0.0
+
+# Email functionality (included in Python standard library)
+# smtplib, email - no pip install needed
+
+# Optional: Enhanced phone number validation
+# Uncomment if you want to use advanced phone validation
+# phonenumbers>=8.13.0

@@ -139,3 +139,94 @@ def generate_csv_filename(entity_name: str, entity_type: str) -> str:
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     
     return f"Entity_Onboarding_Data_{safe_entity_name}_{safe_entity_type}_{timestamp}.csv"
+
+# Investment Research Survey specific CSV generator
+def make_investment_research_csv(payload: Dict[str, Any]) -> str:
+    """
+    Renders the investment research survey answers to a CSV string in the specific format requested.
+    
+    Args:
+        payload: The complete dictionary of serialized answers from the form engine.
+    
+    Returns:
+        A string containing the data in CSV format with headers:
+        question_id, response_text, likert_response, plus additional metadata columns
+    """
+    # Mapping of section titles to question_id abbreviations
+    SECTION_ABBREVIATIONS = {
+        "Prescriptive Knowledge": "PK",
+        "Human vs. Non-Human Actors": "HNH",
+        "Complexity and Decomposition": "CD", 
+        "Types of Causality": "TC",
+        "Mechanisms for Goal Achievement": "MGA",
+        "Justificatory Knowledge": "JK",
+        "Boundary Conditions": "BC",
+        "Trust": "T"
+    }
+    
+    output = io.StringIO()
+    rows = []
+    
+    # Extract participant characterization data - using updated field labels
+    participant_data = payload.get("Participant Characterization (referring to you, not EasyAI)", {})
+    experience_years = participant_data.get("How many years of investment experience do you have?", "")
+    proficiency = participant_data.get("Investment Proficiency Self-Assessment", "")
+    frequency = participant_data.get("What is your investment decision frequency?", "")
+    complexity = participant_data.get("Portfolio Complexity", "")
+    
+    # Process each section
+    for section_title, section_data in payload.items():
+        # Skip non-research sections and participant characterization (handled separately)
+        if section_title in ["Survey Type", "Participant Characterization (referring to you, not EasyAI)", "Additional Comments (Optional)"]:
+            continue
+            
+        if not isinstance(section_data, dict):
+            continue
+            
+        # Get the section abbreviation
+        question_id = SECTION_ABBREVIATIONS.get(section_title, section_title[:3].upper())
+        
+        # Extract Likert scale response and text response
+        likert_response = ""
+        response_text = ""
+        
+        for field_name, value in section_data.items():
+            if value is None or value == "":
+                continue
+                
+            # Check if this is a Likert scale response (contains number 1-5)
+            if isinstance(value, str) and any(f"{i} -" in value for i in range(1, 6)):
+                # Extract the numeric value
+                likert_response = value.split(" -")[0]
+            elif isinstance(value, str):
+                # Treat any other string as response text (removed arbitrary length restriction)
+                if response_text:
+                    response_text += f"; {value}"
+                else:
+                    response_text = value
+        
+        # Add row if we have data
+        if likert_response or response_text:
+            rows.append({
+                "question_id": question_id,
+                "response_text": response_text,
+                "likert_response": likert_response,
+                "experience_years": experience_years,
+                "proficiency": proficiency,
+                "frequency": frequency,
+                "complexity": complexity,
+                "timestamp": payload.get("Submission Date", "")
+            })
+    
+    # Write CSV
+    if rows:
+        headers = ["question_id", "response_text", "likert_response", 
+                  "experience_years", "proficiency", "frequency", "complexity", "timestamp"]
+        writer = csv.DictWriter(output, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows)
+    else:
+        # Return empty CSV with headers if no data
+        output.write("question_id,response_text,likert_response,experience_years,proficiency,frequency,complexity,timestamp\n")
+    
+    return output.getvalue()

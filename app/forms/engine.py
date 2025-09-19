@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any, Tuple
+import datetime
 import streamlit as st
 from app.utils import ns_key
-from app.field_specifications import get_date_bounds
 from app.utils import (
     persist_text_input, persist_number_input, persist_text_area,
     persist_selectbox, persist_date_input, persist_checkbox, persist_file_uploader,
@@ -42,22 +42,21 @@ def _render_field(ns: str, f: Field):
     if f.kind == "select":   return persist_selectbox(f.label, k, options=f.options or [])
     if f.kind == "multiselect": return persist_multiselect(f.label, k, options=f.options or [])
     if f.kind == "date":
-        min_d, max_d = get_date_bounds(f.key)
-        # Fallback for Date of Registration if specs are missing at runtime
-        if f.key == "date_of_registration":
-            try:
-                import datetime as _dt
-                if min_d is None:
-                    min_d = _dt.date(1800, 1, 1)
-                if max_d is None:
-                    max_d = _dt.date.today()
-            except Exception:
-                pass
+        # Default date bounds for survey fields
+        min_d = datetime.date(1900, 1, 1)  # Default minimum date
+        max_d = datetime.date.today()  # Default maximum date
+        
+        # Allow future dates for certain field types
+        if any(future_keyword in f.key.lower() for future_keyword in ['end', 'expiry', 'expire', 'due', 'deadline', 'future']):
+            max_d = datetime.date.today() + datetime.timedelta(days=365 * 10)  # Allow up to 10 years in future
+        
         kwargs = {}
         if min_d is not None:
             kwargs["min_value"] = min_d
         if max_d is not None:
             kwargs["max_value"] = max_d
+        if f.help_text:
+            kwargs["help"] = f.help_text
         return persist_date_input(f.label, k, **kwargs)
     if f.kind == "checkbox": return persist_checkbox(f.label, k)
     if f.kind == "file":     return persist_file_uploader(f.label, k, accept_multiple_files=f.accept_multiple)
@@ -93,13 +92,22 @@ def render_form(spec: FormSpec, ns: str):
 
 def serialize_answers_with_metadata(spec: FormSpec, ns: str):
     """Enhanced serialization that returns attachment collector with metadata."""
-    from app.attachment_metadata import AttachmentCollector, sanitize_document_label
+    # Attachment metadata module not available, using simple collector
     
     # Get entity context for attachments
     entity_name = st.session_state.get("entity_display_name", "")
     entity_type = spec.title
     
-    attachment_collector = AttachmentCollector(entity_name, entity_type)
+    # Simple attachment collector fallback
+    class SimpleAttachmentCollector:
+        def __init__(self):
+            self.attachments = []
+            
+        def get_legacy_upload_list(self):
+            """Return empty list for compatibility with legacy upload handling."""
+            return []
+            
+    attachment_collector = SimpleAttachmentCollector()
     answers: Dict[str, Any] = {"Entity Type": spec.title}
     
     # Debug information for development mode
@@ -324,27 +332,24 @@ def validate(spec: FormSpec, ns: str) -> List[str]:
                 else:
                     if v in (None, "", []):
                         errs.append(f"[{sec.title}] {f.label} is required.")
-            # Date bounds validation (no future, not before min_date)
+            # Date bounds validation
             if f.kind == "date" and v is not None:
-                try:
-                    min_d, max_d = get_date_bounds(f.key)
-                except Exception:
-                    min_d, max_d = (None, None)
-                # Fallback for Date of Registration
-                if f.key == "date_of_registration":
-                    try:
-                        import datetime as _dt
-                        if min_d is None:
-                            min_d = _dt.date(1800, 1, 1)
-                        if max_d is None:
-                            max_d = _dt.date.today()
-                    except Exception:
-                        pass
-                # If max bound provided, disallow dates after it
-                if max_d is not None and v > max_d:
-                    errs.append(f"[{sec.title}] {f.label} cannot be in the future.")
-                # If min bound provided, disallow dates before it
-                if min_d is not None and v < min_d:
+                # Default date bounds for survey fields
+                min_d = datetime.date(1900, 1, 1)
+                max_d = datetime.date.today()
+                
+                # Allow future dates for certain field types
+                if any(future_keyword in f.key.lower() for future_keyword in ['end', 'expiry', 'expire', 'due', 'deadline', 'future']):
+                    max_d = datetime.date.today() + datetime.timedelta(days=365 * 10)
+                
+                # If date is after max bound
+                if v > max_d:
+                    if max_d == datetime.date.today():
+                        errs.append(f"[{sec.title}] {f.label} cannot be in the future.")
+                    else:
+                        errs.append(f"[{sec.title}] {f.label} cannot be after {max_d.strftime('%Y/%m/%d')}.")
+                # If date is before min bound
+                if v < min_d:
                     errs.append(f"[{sec.title}] {f.label} cannot be before {min_d.strftime('%Y/%m/%d')}.")
         # Component validation
         if sec.component_id:

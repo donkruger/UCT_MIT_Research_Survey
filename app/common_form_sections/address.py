@@ -31,7 +31,7 @@ class AddressComponent(SectionComponent):
             persist_text_input("Unit Number (optional)", inst_key(ns, instance_id, "unit_no"))
             persist_text_input("Street Number", inst_key(ns, instance_id, "street_no"))
             persist_text_input("Suburb", inst_key(ns, instance_id, "suburb"))
-            persist_selectbox("Country", inst_key(ns, instance_id, "country"), options=get_countries(include_empty=True, return_codes=False))
+            persist_selectbox("Country", inst_key(ns, instance_id, "country"), options=get_countries(include_empty=True))
         with col2:
             persist_text_input("Complex Name (optional)", inst_key(ns, instance_id, "complex"))
             persist_text_input("Street Name", inst_key(ns, instance_id, "street_name"))

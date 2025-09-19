@@ -1,3 +1,7 @@
+"""
+Review and submission page for the Research Survey Application with premium UI/UX.
+"""
+
 import streamlit as st
 import sys
 from pathlib import Path
@@ -5,329 +9,374 @@ from pathlib import Path
 # --- PAGE CONFIG ---
 favicon_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "favicon.svg"
 st.set_page_config(
-    page_title="Declaration & Submit - Entity Onboarding",
+    page_title="Review & Submit - Research Survey",
     page_icon=str(favicon_path),
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 from app.components.sidebar import render_sidebar
 from app.components.submission import handle_submission
-from app.styling import GOOGLE_FONTS_CSS, GRADIENT_TITLE_CSS, FADE_IN_CSS
+from app.styling import get_all_styles
 from app.utils import initialize_state, persist_checkbox, persist_text_input, current_namespace
 from app.forms.specs import SPECS
 from app.forms.engine import serialize_answers, validate
 
+# Initialize and apply styling
 initialize_state()
-st.markdown(GOOGLE_FONTS_CSS, unsafe_allow_html=True)
-st.markdown(GRADIENT_TITLE_CSS, unsafe_allow_html=True)
-st.markdown(FADE_IN_CSS, unsafe_allow_html=True)
+st.session_state.current_page = "submit"  # Set current page for progress tracking
+st.markdown(get_all_styles(), unsafe_allow_html=True)
 render_sidebar()
 
-# Add enhanced banner with hover effect
-logo_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logos" / "Ownthemarket.png"
-if logo_path.exists():
-    # Enhanced banner with hover effect
-    banner_html = f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css?family=Questrial:400,600,700');
-    
-    .banner-container {{
-        width: 100%;
-        margin: 0 0 2rem 0;
-        max-width: 100%;
-        padding-left: 0;
-    }}
-    
-    .snip *,
-    .snip *:before,
-    .snip *:after {{
-        box-sizing: border-box;
-        transition: all 0.45s ease;
-    }}
-
-    .snip {{
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        max-width: 100%;
-        min-height: 200px;
-        font-family: 'Questrial', sans-serif;
-        color: #fff;
-        font-size: 16px;
-        text-align: left;
-        transform: translateZ(0);
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin: 0;
-        padding: 0;
-    }}
-
-    .snip:hover .snip__title,
-    .snip:hover .snip__text {{
-        transform: translateY(0);
-        opacity: 1;
-        transition-delay: 0.2s;
-    }}
-
-    .snip::before,
-    .snip::after {{
-        content: "";
+# Hero section for review page
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(30, 64, 175, 0.2);
+    position: relative;
+    overflow: hidden;
+">
+    <div style="
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(135deg, #0fbce3 0%, #2c5aa0 100%);
-        opacity: 0.7;
-        transition: all 0.45s ease;
-    }}
-
-    .snip::before {{
-        transform: skew(30deg) translateX(-65%);
-    }}
-
-    .snip::after {{
-        transform: skew(-30deg) translateX(-55%);
-    }}
-
-    .snip:hover::before {{
-        transform: skew(30deg) translateX(-12%);
-        transition-delay: 0.05s;
-    }}
-
-    .snip:hover::after {{
-        transform: skew(-30deg) translateX(-6%);
-    }}
-
-    .snip:hover .snip__figcaption::before {{
-        transform: skew(30deg) translateX(-40%);
-        transition-delay: 0.15s;
-    }}
-
-    .snip:hover .snip__figcaption::after {{
-        transform: skew(-30deg) translateX(-30%);
-        transition-delay: 0.1s;
-    }}
-
-    .snip__image {{
-        backface-visibility: hidden;
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        vertical-align: top;
-    }}
-
-    .snip__figcaption {{
-        position: absolute;
-        top: 0px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
-        z-index: 1;
-        padding: 20px 28% 20px 12px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }}
-
-    .snip__figcaption::before,
-    .snip__figcaption::after {{
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(135deg, #0fbce3 0%, #2c5aa0 100%);
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        content: "";
-        opacity: 0.8;
-        z-index: -1;
-    }}
-
-    .snip__figcaption::before {{
-        transform: skew(30deg) translateX(-85%);
-    }}
-
-    .snip__figcaption::after {{
-        transform: skew(-30deg) translateX(-75%);
-    }}
-
-    .snip__title,
-    .snip__text {{
-        margin: 0;
-        opacity: 0;
-        letter-spacing: 1px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }}
-
-    .snip__title {{
-        font-family: 'Questrial', sans-serif;
-        font-size: 28px;
+        top: -30%;
+        right: -5%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    "></div>
+    <h1 style="
+        color: white;
+        font-size: 2.25rem;
         font-weight: 700;
-        line-height: 1.2em;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        color: #ffffff;
-    }}
+        margin: 0 0 0.75rem 0;
+        letter-spacing: -0.02em;
+        position: relative;
+    ">Review & Submit</h1>
+    <p style="
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.125rem;
+        margin: 0;
+        position: relative;
+    ">
+        Please review your responses and submit your survey
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-    .snip__text {{
-        font-size: 14px;
-        line-height: 1.4;
-        color: #f0f8ff;
-        font-weight: 400;
-    }}
-
-    @media (max-width: 768px) {{
-        .snip {{
-            min-height: 150px;
-        }}
-        .snip__image {{
-            height: 150px;
-        }}
-        .snip__title {{
-            font-size: 22px;
-        }}
-        .snip__text {{
-            font-size: 12px;
-        }}
-        .snip__figcaption {{
-            padding: 16px 24% 16px 10px;
-        }}
-    }}
-    </style>
-    
-    <div class="banner-container">
-        <figure class="snip">
-            <img class="snip__image" src="data:image/png;base64,{logo_path.read_bytes().hex()}" alt="Entity Onboarding Banner" />
-            <figcaption class="snip__figcaption">
-                <h3 class="snip__title">Congrats, you're almost there!</h3>
-                <p class="snip__text">
-                    Final step: Review your information, accept the declaration, and submit your entity onboarding application.
-                </p>
-            </figcaption>
-        </figure>
-    </div>
-    """
-    
-    # Convert image to base64 for embedding
-    import base64
-    with open(logo_path, "rb") as img_file:
-        img_base64 = base64.b64encode(img_file.read()).decode()
-    
-    # Replace the hex placeholder with actual base64
-    banner_html = banner_html.replace(f"data:image/png;base64,{logo_path.read_bytes().hex()}", f"data:image/png;base64,{img_base64}")
-    
-    st.markdown(banner_html, unsafe_allow_html=True)
-else:
-    st.warning("Logo not found at expected path")
-
-st.markdown('<h1 class="gradient-title">Declaration & Submit</h1>', unsafe_allow_html=True)
-
-# Development Mode Indicator
+# Development Mode Indicator with modern styling
 try:
     from app.utils import is_dev_mode
     if is_dev_mode():
-        st.warning("""
-        ⚠️ **DEVELOPMENT MODE ACTIVE** ⚠️
-        
-        Form validation is disabled. You can submit with incomplete data for testing purposes.
-        This should only be used for development/testing - not for production submissions.
-        """)
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+        ">
+            <div style="display: flex; align-items: center;">
+                <div style="
+                    background: #f59e0b;
+                    color: white;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1rem;
+                    font-weight: bold;
+                ">⚡</div>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0; color: #92400e;">Development Mode Active</h4>
+                    <p style="margin: 0; color: #78350f; font-size: 0.875rem;">
+                        Form validation is disabled for testing purposes
+                    </p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 except ImportError:
     pass
 
-persist_checkbox("I/we declare the information provided is true, accurate, complete, and up-to-date.", "accept")
-st.markdown(" ")
-cols = st.columns(2)
-with cols[0]:
-    persist_text_input("Signatory #1 – Full Name", "s1_name")
-with cols[1]:
-    persist_text_input("Signatory #1 – Designation", "s1_desig")
-cols = st.columns(2)
-with cols[0]:
-    persist_text_input("Signatory #2 – Full Name (optional)", "s2_name")
-with cols[1]:
-    persist_text_input("Signatory #2 – Designation (optional)", "s2_desig")
+# Check if a survey has been selected
+if 'survey_type' not in st.session_state or not st.session_state.survey_type:
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 2px solid #ef4444;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+    ">
+        <p style="color: #7f1d1d; margin: 0 0 1rem 0;">
+            Please complete the survey questions before proceeding to review.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link('main.py', label='← Return to Survey Questions')
+    st.stop()
 
-st.markdown("---")
+# Get current survey information
+survey_type = st.session_state.get('survey_type', '')
+survey_display_name = st.session_state.get('survey_display_name', 'Survey')
 
-# FEEDBACK COMPONENT INTEGRATION
-from app.components.feedback import render_feedback_component
-feedback_data = render_feedback_component()
+# Survey information cards
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, #f0f4ff 0%, #e0e9ff 100%);
+        border-radius: 16px;
+        padding: 1.25rem;
+        border: 1px solid #c7d5ff;
+        height: 80px;
+    ">
+        <p style="
+            color: #6b7280;
+            font-size: 0.75rem;
+            margin: 0 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        ">Survey Type</p>
+        <p style="
+            color: #1f2937;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+        ">{survey_display_name}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Store feedback in session state for submission handler
-if feedback_data:
-    st.session_state['feedback_data'] = feedback_data
-else:
-    # Clear feedback data if user removed all feedback content
-    if 'feedback_data' in st.session_state:
-        del st.session_state['feedback_data']
+# Optional reference
+survey_ref = st.session_state.get('survey_reference', '')
+with col2:
+    if survey_ref:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-radius: 16px;
+            padding: 1.25rem;
+            border: 1px solid #86efac;
+            height: 80px;
+        ">
+            <p style="
+                color: #6b7280;
+                font-size: 0.75rem;
+                margin: 0 0 0.5rem 0;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            ">Reference</p>
+            <p style="
+                color: #1f2937;
+                font-size: 1.125rem;
+                font-weight: 600;
+                margin: 0;
+            ">{survey_ref}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
+            border-radius: 16px;
+            padding: 1.25rem;
+            border: 1px solid #e9ecef;
+            height: 80px;
+        ">
+            <p style="
+                color: #9ca3af;
+                font-size: 0.75rem;
+                margin: 0 0 0.5rem 0;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            ">Reference</p>
+            <p style="
+                color: #9ca3af;
+                font-size: 1rem;
+                margin: 0;
+            ">Not provided</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-st.subheader("Final Submission")
+st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 
+# Declaration section with modern card design
+st.markdown("""
+<div style="
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e9ff;
+    margin-bottom: 2rem;
+">
+    <h3 style="
+        color: #1f2937;
+        font-size: 1.5rem;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+    ">
+        <span style="
+            background: linear-gradient(135deg, #4a69ff 0%, #8b5cf6 100%);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.25rem;
+        ">✓</span>
+        Declaration
+    </h3>
+    <p style="
+        color: #6b7280;
+        line-height: 1.6;
+        margin: 0 0 1.5rem 0;
+    ">
+        Please review your responses and confirm that the information provided is accurate.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Move the checkbox inside the card visually
+persist_checkbox(
+    "I confirm that all information provided in this survey is accurate and complete to the best of my knowledge.",
+    "accept"
+)
+
+st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+
+# Spacer before submission section
+st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+
+# Final submission section with call-to-action
 def reconstruct_payload():
+    """Reconstruct the survey payload from session state."""
     ns = current_namespace()
     spec = SPECS.get(ns)
-    if not spec:
-        st.error("The selected entity type is not configured.")
-        st.stop()
-
-    # Formal validation pass (component + required fields)
-    errors = validate(spec, ns)
-    if errors:
-        st.error("Please resolve the following issues before submitting:")
-        for e in errors:
-            st.markdown(f"- {e}")
-        st.stop()
-
-    # Use enhanced serialization when available
-    attachment_collector = None
-    try:
-        from app.forms.engine import serialize_answers_with_metadata
-        answers, attachment_collector = serialize_answers_with_metadata(spec, ns)
-        
-        # Get legacy upload list for backward compatibility
-        uploads = attachment_collector.get_legacy_upload_list()
-        
-        # Debug information for development mode
-        try:
-            from app.utils import is_dev_mode
-            if is_dev_mode():
-                st.info(f"🔧 **Enhanced Serialization Active** - {attachment_collector.get_attachment_count()} attachments with metadata")
-                summary = attachment_collector.get_attachment_summary()
-                if summary:
-                    st.info("📎 **Enhanced Attachment Names Preview:**")
-                    for filename in summary[:3]:  # Show first 3
-                        st.info(f"  • {filename}")
-                    if len(summary) > 3:
-                        st.info(f"  • ... and {len(summary) - 3} more")
-        except ImportError:
-            pass
-        
-    except ImportError:
-        # Fallback to traditional serialization
-        from app.forms.engine import serialize_answers
-        answers, uploads = serialize_answers(spec, ns)
-        st.info("ℹ️ Using legacy serialization (enhanced naming not available)")
     
-    # Attach global submission metadata
-    answers["Entity User ID"] = st.session_state.get("entity_user_id", "")
+    if not spec:
+        if not SPECS:
+            st.error("No surveys are configured. Please add survey specifications.")
+            st.stop()
+        else:
+            st.error(f"Survey type '{ns}' is not configured.")
+            st.stop()
+    
+    # Check if development mode is active
+    try:
+        from app.utils import is_dev_mode
+        skip_validation = is_dev_mode()
+    except ImportError:
+        skip_validation = False
+    
+    # Formal validation pass (component + required fields)
+    if not skip_validation:
+        errors = validate(spec, ns)
+        if errors:
+            st.markdown("""
+            <div style="
+                background: #fee2e2;
+                border: 2px solid #ef4444;
+                border-radius: 16px;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            ">
+                <h4 style="color: #7f1d1d; margin: 0 0 1rem 0;">
+                    Please resolve the following issues:
+                </h4>
+            </div>
+            """, unsafe_allow_html=True)
+            for e in errors:
+                st.markdown(f"• {e}")
+            st.stop()
+    
+    # Serialize survey answers
+    answers, uploads = serialize_answers(spec, ns)
+    
+    # Attach metadata
+    answers["Survey Type"] = survey_display_name
+    
+    # Add declaration and consent information
     answers["Declaration"] = {
         "Declaration Accepted": st.session_state.get("accept", False),
-        "Signatory 1 Name": st.session_state.get("s1_name", ""),
-        "Signatory 1 Designation": st.session_state.get("s1_desig", ""),
-        "Signatory 2 Name": st.session_state.get("s2_name", ""),
-        "Signatory 2 Designation": st.session_state.get("s2_desig", ""),
+        "Informed Consent Signed By": st.session_state.get("consent_name", ""),
     }
-    return answers, uploads, attachment_collector
+    
+    # Add feedback if available
+    if 'feedback_data' in st.session_state:
+        answers["Feedback"] = st.session_state['feedback_data']
+    
+    return answers, uploads
 
-if st.button("Confirm & Submit", use_container_width=True, type="primary"):
-    answers_data, uploaded_files_data, attachment_collector = reconstruct_payload()
+# Submit button with modern design
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #4a69ff 0%, #8b5cf6 100%);
+    border-radius: 24px;
+    padding: 3rem;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(74, 105, 255, 0.2);
+    margin: 2rem 0;
+">
+    <h3 style="
+        color: white;
+        font-size: 1.75rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+    ">Ready to Submit?</h3>
+    <p style="
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        margin: 0 0 2rem 0;
+    ">
+        Your survey responses will be securely transmitted for analysis
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    # Custom styled button
+    submit_button = st.button(
+        "Submit Survey →",
+        use_container_width=True,
+        type="primary",
+        key="submit_survey"
+    )
     
-    # Store attachment collector in session state for submission handler
-    if attachment_collector:
-        st.session_state['_attachment_collector'] = attachment_collector
-    
-    handle_submission(answers_data, uploaded_files_data) 
+    if submit_button:
+        # Check declaration
+        if not st.session_state.get("accept", False):
+            st.markdown("""
+            <div style="
+                background: #fee2e2;
+                border: 2px solid #ef4444;
+                border-radius: 12px;
+                padding: 1rem;
+                margin-top: 1rem;
+                text-align: center;
+            ">
+                <p style="color: #7f1d1d; margin: 0;">
+                    Please accept the declaration before submitting.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.stop()
+        
+        # Reconstruct and submit with progress indicator
+        with st.spinner("Processing your submission..."):
+            answers_data, uploaded_files_data = reconstruct_payload()
+            handle_submission(answers_data, uploaded_files_data)

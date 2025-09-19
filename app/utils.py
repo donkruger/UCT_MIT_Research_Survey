@@ -1,4 +1,9 @@
-# app/utils.py
+"""
+Utility functions for the Research Survey Application.
+
+This module provides session state management, widget persistence,
+and helper functions for the survey application.
+"""
 
 import base64
 import re
@@ -7,51 +12,22 @@ from typing import List
 import streamlit as st
 import datetime
 
-# Import controlled lists from enhanced centralized module
-from app.controlled_lists_enhanced import (
-    get_entity_types,
-    get_source_of_funds_options,
-    get_industry_options,
-    get_countries,
-    get_member_role_options
-)
-
-# Export for backwards compatibility
-ENTITY_TYPES = get_entity_types(include_empty=False, return_codes=False)
-SOURCE_OF_FUNDS_OPTIONS = get_source_of_funds_options(include_empty=False, return_codes=False)
-INDUSTRY_OPTIONS = get_industry_options(include_empty=False, return_codes=False)
-COUNTRIES = get_countries(include_empty=False, return_codes=False)
-MEMBER_ROLE_OPTIONS = get_member_role_options(include_empty=False, return_codes=False)
-
 def sanitize_ns(label: str) -> str:
     """Sanitize a label to create a valid namespace identifier."""
     return re.sub(r'[^a-z0-9_]', '', label.strip().lower().replace(' ', '_'))
 
 def current_namespace() -> str:
-    """Get the current entity type namespace."""
-    return sanitize_ns(st.session_state.get("entity_type", ENTITY_TYPES[0]))
+    """Get the current survey type namespace."""
+    default_survey = st.session_state.get("survey_type", "default")
+    return sanitize_ns(default_survey)
 
 def ns_key(ns: str, key: str) -> str:
     """Create a namespaced key for session state."""
     return f"{ns}__{key}"
 
 def inst_key(ns: str, instance_id: str, key: str) -> str:
-    """Namespace a key for a specific component instance (e.g., 'directors')."""
+    """Namespace a key for a specific component instance."""
     return ns_key(ns, f"{instance_id}__{key}")
-
-def _cleanup_legacy_values():
-    """Clean up any legacy session state values that might cause errors."""
-    # Clean up any province values that might be set to "Other" which is no longer valid
-    try:
-        # Get all keys safely
-        all_keys = list(st.session_state.keys()) if hasattr(st.session_state, 'keys') else []
-        keys_to_check = [k for k in all_keys if k.endswith("__province")]
-        for key in keys_to_check:
-            if st.session_state.get(key) == "Other":
-                st.session_state[key] = ""
-    except Exception:
-        # If there's any issue with cleanup, just continue
-        pass
 
 def initialize_state():
     """Initializes all required session state variables using setdefault."""
@@ -62,30 +38,18 @@ def initialize_state():
         
         # Define all default values in a dictionary
         defaults = {
-            # New entity onboarding system
+            # Survey system
             "messages": [],
             "accept": False,
-            "entity_type": ENTITY_TYPES[0],
-            "entity_user_id": "",
-            "entity_display_name": "",
-            "s1_name": "", "s1_desig": "",
-            "s2_name": "", "s2_desig": "",
+            "survey_type": "",
+            "survey_display_name": "",
+            
             # Development mode toggle for testing
             "dev_mode": False,
-            "dev_recipient_email": "jpearse@purplegroup.co.za",
+            "dev_recipient_email": "don.kruger123@gmail.com",
+            
             # Favicon path for consistent use across pages
             "favicon_path": str(favicon_path),
-            
-            # Legacy DDQ fields (kept for backward compatibility during transition)
-            "reg_name": "", "trading_name": "", "reg_no": "", "fsp_no": "",
-            "aum": 0.0, "phys_addr": "", "bus_overview": "", "inv_phil": "",
-            "research": "", "compliance_proc": "", "regulatory_matters": "",
-            "final_notes": "",
-            "n_auth": 1, "n_dir": 1, "n_ubo": 0, "n_staff": 1, "n_ic": 1,
-            # Completion step tracking
-            "step_1_complete": False, "step_2_complete": False, "step_3_complete": False,
-            "step_4_complete": False, "step_5_complete": False, "step_6_complete": False,
-            "step_7_complete": False, "step_8_complete": False,
         }
         
         # Use setdefault to initialize keys without overwriting existing ones
@@ -93,9 +57,6 @@ def initialize_state():
             st.session_state.setdefault(key, value)
         
         st.session_state.state_initialized = True
-    
-    # Always run cleanup to handle legacy values
-    _cleanup_legacy_values()
 
 def is_dev_mode() -> bool:
     """Check if development mode is enabled."""
@@ -250,12 +211,20 @@ def persist_multiselect(label: str, state_key: str, **kwargs):
     """Persistent multiselect widget."""
     return persist_widget(st.multiselect, label, state_key, **kwargs)
 
+def persist_radio(label: str, state_key: str, **kwargs):
+    """Persistent radio button widget."""
+    return persist_widget(st.radio, label, state_key, **kwargs)
+
+def persist_slider(label: str, state_key: str, **kwargs):
+    """Persistent slider widget."""
+    return persist_widget(st.slider, label, state_key, **kwargs)
+
 def repeat_prefix(idx: int, label: str) -> str:
     """Prefix repeated-section labels with an enumerator (1-based)."""
     return f"**{label} #{idx+1}**"
 
 def text_wrap(text: str, width: int) -> List[str]:
-    """Rudimentary word wrap for PDF lines to prevent overflow."""
+    """Rudimentary word wrap for text lines to prevent overflow."""
     words, out, line = str(text).split(), [], ""
     for w in words:
         if len(line) + len(w) + 1 > width:
@@ -266,22 +235,6 @@ def text_wrap(text: str, width: int) -> List[str]:
     if line:
         out.append(line)
     return out
-
-def get_completion_progress() -> tuple[int, float]:
-    """Calculate completion progress for DDQ steps.
-    
-    Returns:
-        tuple: (completed_steps, progress_percentage)
-    """
-    completion_steps = [
-        "step_1_complete", "step_2_complete", "step_3_complete", "step_4_complete",
-        "step_5_complete", "step_6_complete", "step_7_complete", "step_8_complete"
-    ]
-    
-    completed_steps = sum(st.session_state.get(step, False) for step in completion_steps)
-    progress_percentage = (completed_steps / 8) * 100
-    
-    return completed_steps, progress_percentage
 
 def get_favicon_path() -> str:
     """Get the favicon path from session state.
@@ -302,4 +255,4 @@ def svg_image_html(path: Path, width: int = 200) -> str:
         )
     except Exception:
         # If the file cannot be read, return empty string to avoid breaking the UI
-        return "" 
+        return ""

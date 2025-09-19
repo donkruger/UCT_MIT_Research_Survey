@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.attachment_metadata import AttachmentCollector
+    # from app.attachment_metadata import AttachmentCollector
+    pass
 
 class SectionComponent(ABC):
     """Interface for reusable UI sections."""
