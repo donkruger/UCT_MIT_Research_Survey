@@ -222,8 +222,12 @@ def render_sidebar():
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        padding: 1rem;
+        padding: 0.875rem;
         margin-bottom: 1.5rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
     }
     
     .progress-title {
@@ -253,12 +257,16 @@ def render_sidebar():
         display: flex;
         justify-content: space-between;
         align-items: center;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
     
     .progress-step {
         text-align: center;
         flex: 0 0 auto;
-        min-width: 60px;
+        min-width: 45px;
+        max-width: 50px;
     }
     
     .step-circle {
@@ -290,14 +298,19 @@ def render_sidebar():
     
     .step-label {
         color: rgba(255, 255, 255, 0.6);
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        line-height: 1.2;
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .step-connector {
         height: 2px;
         flex: 1;
-        margin: 0 0.25rem 1rem;
-        min-width: 20px;
+        margin: 0 0.125rem 1rem;
+        min-width: 15px;
+        max-width: 30px;
     }
     
     .step-connector.active {
