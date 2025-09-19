@@ -125,6 +125,95 @@ def render_sidebar():
     
     /* All expander custom styling removed to use Streamlit defaults */
     
+    /* Specific targeting for survey section headers by text content */
+    /* This ensures white text on dark backgrounds for these specific sections */
+    .streamlit-expanderHeader:has(svg):has(div:contains("Research Questionnaire Instructions")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Participant Characterization")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Prescriptive Knowledge")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Human vs. Non-Human Actors")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Complexity and Decomposition")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Types of Causality")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Mechanisms for Goal Achievement")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Justificatory Knowledge")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Boundary Conditions")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Trust")),
+    .streamlit-expanderHeader:has(svg):has(div:contains("Additional Comments")) {
+        color: white !important;
+    }
+    
+    /* Alternative approach using attribute selectors if :has() doesn't work */
+    [aria-label*="Research Questionnaire Instructions"],
+    [aria-label*="Participant Characterization"],
+    [aria-label*="Prescriptive Knowledge"],
+    [aria-label*="Human vs. Non-Human Actors"],
+    [aria-label*="Complexity and Decomposition"],
+    [aria-label*="Types of Causality"],
+    [aria-label*="Mechanisms for Goal Achievement"],
+    [aria-label*="Justificatory Knowledge"],
+    [aria-label*="Boundary Conditions"],
+    [aria-label*="Trust"],
+    [aria-label*="Additional Comments"] {
+        color: white !important;
+    }
+    
+    /* Target the text inside these specific expander headers */
+    .streamlit-expanderHeader p,
+    .streamlit-expanderHeader div {
+        color: inherit !important;
+    }
+    
+    /* JavaScript-based solution for more reliable targeting */
+    </style>
+    <script>
+    // Wait for DOM to be ready
+    function fixExpanderColors() {
+        const targetTitles = [
+            "Research Questionnaire Instructions",
+            "Participant Characterization",
+            "Prescriptive Knowledge",
+            "Human vs. Non-Human Actors",
+            "Complexity and Decomposition",
+            "Types of Causality",
+            "Mechanisms for Goal Achievement",
+            "Justificatory Knowledge",
+            "Boundary Conditions",
+            "Trust",
+            "Additional Comments"
+        ];
+        
+        // Find all expander headers
+        const expanders = document.querySelectorAll('.streamlit-expanderHeader');
+        
+        expanders.forEach(expander => {
+            const text = expander.textContent || expander.innerText || "";
+            
+            // Check if this expander contains any of our target titles
+            if (targetTitles.some(title => text.includes(title))) {
+                expander.style.color = 'white';
+                expander.style.setProperty('color', 'white', 'important');
+                
+                // Also set color for all child elements
+                const children = expander.querySelectorAll('*');
+                children.forEach(child => {
+                    child.style.color = 'white';
+                    child.style.setProperty('color', 'white', 'important');
+                });
+            }
+        });
+    }
+    
+    // Run on load and periodically to catch dynamically added elements
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixExpanderColors);
+    } else {
+        fixExpanderColors();
+    }
+    
+    // Re-run periodically to catch any dynamic updates
+    setInterval(fixExpanderColors, 1000);
+    </script>
+    <style>
+    
     
     /* Animations */
     @keyframes pulse {
