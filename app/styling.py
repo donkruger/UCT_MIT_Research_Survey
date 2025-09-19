@@ -460,7 +460,8 @@ CONTAINER_STYLING_CSS = """
     padding: var(--space-lg) !important;
     font-weight: var(--font-medium) !important;
     font-size: var(--text-lg) !important;
-    background: linear-gradient(to right, var(--primary-50), transparent) !important;
+    background: var(--primary-600) !important;  /* Solid blue instead of gradient */
+    color: white !important;  /* White text for contrast */
     border-radius: var(--radius-lg) !important;
 }
 
