@@ -340,11 +340,11 @@ elif not accept_all and st.session_state.get('accept_all_processed', False):
 
 # Individual consent items
 st.markdown("#### Individual Consent Items")
-all_consents_given = True
 for key, text in consent_items:
-    consent_given = persist_checkbox(text, key)
-    if not consent_given:
-        all_consents_given = False
+    persist_checkbox(text, key)
+
+# Check if all consents are given (from session state, not widget return values)
+all_consents_given = all(st.session_state.get(key, False) for key, _ in consent_items)
 
 # Check if individual items match accept_all state
 individual_all_checked = all(st.session_state.get(key, False) for key, _ in consent_items)
@@ -361,6 +361,18 @@ st.markdown(f"**Date of Consent:** {current_date}")
 
 # Proceed Button
 st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+
+# Show validation status to help users understand what's needed
+if not full_name or not email or not all_consents_given:
+    missing_items = []
+    if not full_name:
+        missing_items.append("Full Name")
+    if not email:
+        missing_items.append("Email Address")
+    if not all_consents_given:
+        missing_items.append("All consent confirmations")
+    
+    st.warning(f"⚠️ Please complete the following to proceed: {', '.join(missing_items)}")
 
 if full_name and email and all_consents_given:
     # Store consent information
