@@ -300,7 +300,7 @@ def main():
                         font-weight: 700;
                         margin: 0 0 0.75rem 0;
                         letter-spacing: -0.025em;
-                    ">Howdy!</h2>
+                    ">Howdy Purplista!</h2>
                     <p style="
                         color: #475569;
                         font-size: 1.125rem;
@@ -320,16 +320,21 @@ def main():
                             Please complete the following steps:
                         </h4>
                         <ol style="color: #78350f; margin: 0; padding-left: 1.25rem; line-height: 1.6;">
-                            <li style="margin-bottom: 0.5rem;">
+                            <li style="margin-bottom: 0.75rem;">
                                 <strong>Experience the EasyAI system</strong> - Interact with the tool until you feel 
-                                comfortable asking for investment advice
+                                comfortable asking for investment advice. Access EasyAI by clicking "🤖Try EasyAI System First" 
+                                and be sure to come back here once you are done.
                             </li>
-                            <li style="margin-bottom: 0.5rem;">
-                                <strong>Keep your responses objective and honest</strong> - This ensures the scientific 
-                                integrity of our evaluation
+                            <li style="margin-bottom: 0.75rem;">
+                                <strong>Complete survey</strong> - Come back here once you are satisfied with the extent of 
+                                interaction with EasyAI and complete the informed consent form to proceed with the survey. 
+                                Accepting the informed consent can be done by scrolling to the bottom of <a href="https://uct-mit-research-survey.streamlit.app/Informed_Consent" 
+                                target="_blank" style="color: #2563eb; text-decoration: underline;">this link</a> 
+                                or by clicking the button below. You won't be able to proceed with the survey without completing this form.
                             </li>
                             <li>
-                                <strong>Complete survey</strong> - Come back here and complete the informed consent form to proceed with the survey.
+                                <strong>Keep your responses objective and honest</strong> - This ensures the scientific 
+                                integrity of our evaluation. No need to be nice. Please be honest, for the sake of good science.
                             </li>
                         </ol>
                     </div>
