@@ -330,7 +330,7 @@ def main():
                                 interaction with EasyAI and complete the informed consent form to proceed with the survey. 
                                 Accepting the informed consent can be done by scrolling to the bottom of <a href="https://uct-mit-research-survey.streamlit.app/Informed_Consent" 
                                 target="_blank" style="color: #2563eb; text-decoration: underline;">this link</a> 
-                                or by clicking the button below. You won't be able to proceed with the survey without completing this form.
+                                or by clicking the button below. You can also navigate to this form via the navigation bar on the left.You won't be able to proceed with the survey without completing the consent form.
                             </li>
                             <li>
                                 <strong>Keep your responses objective and honest</strong> - This ensures the scientific 
