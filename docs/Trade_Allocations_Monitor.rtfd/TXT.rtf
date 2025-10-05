@@ -1,0 +1,391 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2820
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 TimesNewRomanPS-BoldMT;\f1\froman\fcharset0 TimesNewRomanPSMT;\f2\fmodern\fcharset0 CourierNewPSMT;
+\f3\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue255;\red109\green109\blue109;
+\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c0\c0\c100000;\cssrgb\c50196\c50196\c50196;
+\cssrgb\c0\c0\c0\c84706;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid2\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa428\partightenfactor0
+
+\f0\b\fs64 \cf2 \expnd0\expndtw0\kerning0
+Trade Allocations Monitor\
+\pard\pardeftab720\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://purplegroup3.atlassian.net/wiki/download/attachments/3075866628/Trade%20Monitor%20Technical%20Final.mp4?version=2&modificationDate=1696324652715&cacheVersion=1&api=v2"}}{\fldrslt 
+\f1\b0\fs32 \cf3 \ul \ulc3 Trade Monitor Technical Final.mp4}}
+\f1\b0\fs32  \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\ul TradeAllocations:\cf2 \ulnone \
+\ls1\ilvl0\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\ul Trade Allocations API:\cf2 \ulnone \
+\ls1\ilvl0\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\ul Trade Monitor:\cf2 \ulnone  \
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\partightenfactor0
+\ls1\ilvl1\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u9702 	}\expnd0\expndtw0\kerning0
+\ul TradeRequestMonitorAggregatorMessage:\cf2 \ulnone \
+\ls1\ilvl1\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u9702 	}\expnd0\expndtw0\kerning0
+\ul TradeGroupStatus:\cf2 \ulnone \
+\ls1\ilvl1\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u9702 	}\expnd0\expndtw0\kerning0
+\ul Aggregator logic:\cf2 \ulnone \
+\ls1\ilvl1\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u9702 	}\expnd0\expndtw0\kerning0
+\ul processTradeallocationGroupComplete:\cf2 \ulnone \
+\ls1\ilvl1\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u9702 	}\expnd0\expndtw0\kerning0
+\ul GET methods:\cf2 \ulnone \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf3 \kerning1\expnd0\expndtw0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\ul Testing, capacity planning:\cf2 \ulnone \
+\pard\pardeftab720\sa160\qc\partightenfactor0
+\cf4 \
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 The purpose of this application is to monitor groups of trades placed in bulk via the Trade Allocations services, and on completion of the last trade in the group, notify other applications via Kafka events.\
+The 
+\f0\b Trade Group Monitor
+\f1\b0  service itself is an additional service with a Mongo database that saves Trade monitor Kafka messages, with APIs to query the status by group or individual trade allocationid, userid, trustaccountid, or transactionid. This can be used by other systems like Admin to check the status of a user\'92s trades without having to query the Trade allocations table. The Trade allocations database table has to manage trade requests and should not be available long term. The intention was always to delete successful or error status trades and only keep unallocated requests in the database until they finish processing.\
+Trade Monitor saves all the trade monitor request messages with the same data as found in the TradeAllocations table. As the trade monitor sends updated states, the Trade Monitor services will update the allocation status and data via its consumer.\
+These trades will be saved into a MongoDB and APIs will be created to query the status of a group of trades.\
+
+\f0\b TradeMonitor
+\f1\b0  - Trade Requests table in Mongo has the data as below.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26\fsmilli13333 \cf2 create table dbo.TradeAllocation\
+(\
+\'a0\'a0\'a0 TradeAllocationId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint identity\
+\'a0\'a0\'a0 UserId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 InstrumentId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 Price\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 float,\
+\'a0\'a0\'a0 TrustAccountId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 Amount\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 decimal(20, 4),\
+\'a0\'a0\'a0 Units\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 decimal(25, 15),\
+\'a0\'a0\'a0 TradeTypeID\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 int,\
+\'a0\'a0\'a0 AllocationStatusId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 int\
+\'a0\'a0\'a0 TransactionID\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 TrustAccountActionId\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 FailureReason\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 varchar(max),\
+\'a0\'a0\'a0 GroupId\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 uniqueidentifier,\
+\'a0\'a0\'a0 DepositRequired\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bit,\
+\'a0\'a0\'a0 CostCalculationType\'a0\'a0\'a0\'a0\'a0\'a0\'a0 int,\
+\'a0\'a0\'a0 UniqueTransactionReference varchar(50),\
+\'a0\'a0\'a0 DateCreated\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 datetime,\
+\'a0\'a0\'a0 TriggerOnDate\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 datetime,\
+\'a0\'a0\'a0 TransactionTag\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 varchar(100) default NULL,\
+\'a0\'a0\'a0 IsCashMovement\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bit\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 default 0,\
+\'a0\'a0\'a0 AllowNegativeMovement\'a0\'a0\'a0\'a0\'a0 bit,\
+\'a0\'a0\'a0 TraderID\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 bigint,\
+\'a0\'a0\'a0 TotalTradeRequestsInGroup\'a0 int\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs32 \cf2 Additional work was done on Trade Allocations Applications:\
+\pard\pardeftab720\sa360\partightenfactor0
+
+\f0\b\fs36 \cf2 TradeAllocations:\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\b0\fs32 \cf2 The Trade Allocations service sends out a Kafka message called TradeMonitorMessage with the following schema to the 
+\f0\b trade_allocation_status_update_monitor
+\f1\b0  Kafka topic:\
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 {{\NeXTGraphic unknown.png \width5000 \height5000 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\pardeftab720\sa320\partightenfactor0
+\cf2 \
+This will be done every time a trade allocation status is changed.\
+Trade Allocations Source table will be updated to read TotalTradeRequestsInGroup associated to a trade allocation\
+ALTER TABLE [GT247CFD].[dbo].[TradeAllocation]\uc0\u8232 ADD TotalTradeRequestsInGroup INT NULL;\
+ADD 
+\f2\fs26\fsmilli13333 Proceeds double
+\f1\fs32 \
+\pard\pardeftab720\li960\fi-480\sa320\partightenfactor0
+
+\f3\fs26\fsmilli13333 \cf2 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 Update 
+\f2\fs26\fsmilli13333 ALLOCATION_TO_QUEUE_QUERY
+\f1\fs32 \
+\pard\pardeftab720\sa360\partightenfactor0
+
+\f0\b\fs36 \cf2 Trade Allocations API:\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\b0\fs32 \cf2 On every allocation status change after a TradeAllocationEntity is updated, a TradeMonitorMessage (same as above) will be sent to the 
+\f0\b trade_allocation_status_update_monitor
+\f1\b0  topic.\
+On client trade success message consumed in Trade Allocations API, units and price are set before TradeAllocationsEntity is saved. Risk and TransactionPrice can be found in the TradeDTO object in the client trade success kafka message already consumed.\
+NB Placing Trade Allocations Groups to be added for group tracking where GroupID and total trades in group is set 
+\f0\b programmatically
+\f1\b0 .\
+\pard\pardeftab720\sa160\qc\partightenfactor0
+\cf4 \
+\pard\pardeftab720\sa360\partightenfactor0
+
+\f0\b\fs36 \cf2 Trade Monitor:\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\fs32 \cf2 Kafka Stream aggregation to track allocations by group and notify when the whole group is done: 
+\f1\b0 \
+Trades are executed as a batch by using the TradeAllocations 
+\f2\fs26\fsmilli13333 groupId
+\f1\fs32  column. When a managed product investment is done, it consists of multiple trades that make up the investment according to the asset managers' specifications. E.g. Investing $100 in a product may result in 5 trades being placed with different weighting into different instruments. These trades will be placed by putting the instructions into the TradeAllocations (bulk trading) application\'92s database via its apis. It currently has a group ID which can be used to start the processing of the whole batch, as well as grouping trades together. We will be using this groupId to track trade execution and send out an event when the whole group has completed. Completed means when all trades was done, including failures\'85 ie. You could have a batch of 10 trades where 9 will pass and 1 failed and the Trade Monitor will send out an event to notify that it has completed.\
+Create a new table that keeps track of the whole group with api methods to query the status of a group.\
+This will be updated by the Aggregation message and if a Trade complete event is sent, all subsequent messages in the aggregator should be ignored. We can add duplicate checks in the consumer to ensure we don\'92t process a message twice. (Research on how to do this in Kafka streams methods and wether we can use our custom annotation should be done). This can happen on messages being re-processed incorrectly and duplicate error occur that will send error status updates.\
+In order to notify the rest of the business when a batch of trades, bound together with the same GroupID in the TradeAllocations table, has completed, we will use the messages from the trade_request_monitor topic ({\field{\*\fldinst{HYPERLINK "https://purplegroup3.atlassian.net/wiki/spaces/PG/pages/3030188057/Trade+Allocations+-+New+Kafka+implementation"}}{\fldrslt \cf3 \ul \ulc3 see Trade Allocations documentation}}) and apply kafka stream aggregation to them.\
+A new aggregated topic will be created called 
+\f0\b trade_allocation_group_complete. 
+\f1\b0 \
+This topic will ingest TradeMonitorMessage events and create the following 
+\f0\b KTABLE
+\f1\b0 , aggregated by groupID.\
+\pard\pardeftab720\sa425\partightenfactor0
+
+\f0\b \cf2 TradeRequestMonitorAggregatorMessage:\
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 GroupID
+\f1\b0 : GroupId of the TradeAllocation Instruction.\
+
+\f0\b TotalTradeRequestsInGroup
+\f1\b0 : This field will be overwritten every time since it will remain constant and always show what the expected total amount in the group should be.\
+
+\f0\b TotalSuccess
+\f1\b0 : This field will be increased when a trade monitor message is consumed and the following is true:\
+\pard\pardeftab720\li960\fi-480\sa320\partightenfactor0
+
+\f3\fs26\fsmilli13333 \cf2 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 If TradeTypeId = 1 (Trade), and allocationStatusId = 2\
+
+\f3\fs26\fsmilli13333 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 Or if allocationStatusId = 4. (Orders goes to 2, then they trigger when markets open and become successful trades, which is then marked as 4 in Trade allocations and the subsequents TradeRequestMonitor message\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f0\b \cf2 TotalFailed
+\f1\b0 : This field increase by 1 every time a message is received that has allocationStatusId = 3, which indicated a failed trade allocation.\
+
+\f0\b TradesInGroup
+\f1\b0 : List of trade allocation entities with current state. If current entry exists in the List, replace with updated values of the current TradeMonitorMessage.\
+
+\f0\b TrustAccountID
+\f1\b0 \
+KTable events will be sent out on any changes, at a certain interval (configured in application.properties usually 1 sec).\
+We need to save these updates by groupID to a new mongo table in order to query easily.\
+Table data:\
+\pard\pardeftab720\sa425\partightenfactor0
+
+\f0\b \cf2 TradeGroupStatus:\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26\fsmilli13333 \cf2 groupid (uuid)\
+totalSuccess (int), \
+totalFailed (int), \
+TotalTradesInGroup (int), \
+TotalProceeds(double), \
+OverallStatus (int),\'a0 (0 = incomplete, 1 = group successful, 2 = group complete with errors)\
+\pard\pardeftab720\sa425\partightenfactor0
+
+\f0\b\fs32 \cf2 Aggregator logic: \
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26\fsmilli13333 \cf2 If tradeTypeId = 1 (trade) and status = 2, totalSuccess++\
+\'a0\
+If status = 3, totalFail++\
+\'a0\
+If status = 4, totalSuccess++\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs32 \cf2 The Aggregated KTable will at an interval of 1 second, if there were changes, send out the aggregated message containing the latest state of the group to a new topic. E.g\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26\fsmilli13333 \cf2 Message 1: \{ GroupId x, totalSuccess = 1, totalFailed = 2, totalTradeRequestInGroup = 10\}\
+\'a0\
+Message 2: \{ GroupId x, totalSuccess = 3, totalFailed = 3, totalTradeRequestInGroup = 10\}\
+\'a0\
+Message 3: \{ GroupId x, totalSuccess = 7, totalFailed = 3, totalTradeRequestInGroup = 10\}\
+\pard\pardeftab720\sa320\partightenfactor0
+
+\f1\fs32 \cf2 This topic will be consume again by TradeMonitor, and on each message check the following: \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26\fsmilli13333 \cf2 If (totalTradeRequestInGroup = (totalFailed + totalSuccess)\{\
+\'a0\
+\'a0 processTradeallocationGroupComplete(GroupId)\
+\'a0\
+\}\
+\pard\pardeftab720\sa425\partightenfactor0
+
+\f0\b\fs32 \cf2 processTradeallocationGroupComplete:\
+\pard\pardeftab720\li960\fi-480\sa320\partightenfactor0
+
+\f1\b0 \cf2 1.
+\fs18\fsmilli9333 \'a0\'a0\'a0\'a0 
+\fs32 Retrieve all the trades from the 
+\f0\b TradeRequestMonitorAggregatorMessage
+\f1\b0 .\
+2.
+\fs18\fsmilli9333 \'a0\'a0\'a0\'a0 
+\fs32 Total all the proceeds in the list and add them a new field called totalProceeds\
+3.
+\fs18\fsmilli9333 \'a0\'a0\'a0\'a0 
+\fs32 Send a new 
+\f0\b TradeAllocationGroupCompleteMessage
+\f1\b0  kafka message containing the above list and total proceeds to a new kafka topic 
+\f0\b trade_allocation_group_complete
+\f1\b0 . \
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 4. Save the details of the group status and update the total proceeds column.\
+\pard\pardeftab720\partightenfactor0
+\cf2 {{\NeXTGraphic 1__#$!@%!#__unknown.png \width7720 \height5000 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 This is the new end state right?\
+\pard\pardeftab720\partightenfactor0
+\cf2 {{\NeXTGraphic 2__#$!@%!#__unknown.png \width11400 \height9825 \appleattachmentpadding0 \appleembedtype0 \appleaqc
+}¬}\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 API methods:\
+\pard\pardeftab720\sa425\partightenfactor0
+
+\f0\b \cf2 GET methods:\
+\pard\pardeftab720\li960\fi-480\sa320\partightenfactor0
+
+\f3\b0\fs26\fsmilli13333 \cf2 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 Query status of group by 
+\f2\fs26\fsmilli13333 group id
+\f1\fs32 \
+
+\f3\fs26\fsmilli13333 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 Query by 
+\f2\fs26\fsmilli13333 tradeallocationid
+\f1\fs32 \
+
+\f3\fs26\fsmilli13333 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 Query by 
+\f2\fs26\fsmilli13333 transactionid
+\f1\fs32 \
+
+\f3\fs26\fsmilli13333 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 CRUD methods via spring data rest to alter and query all tables\
+
+\f3\fs26\fsmilli13333 \'b7
+\f1\fs18\fsmilli9333 \'a0\'a0\'a0\'a0\'a0\'a0 
+\fs32 An API method to reconstruct the 
+\f0\b TradeAllocationGroupCompleteMessage
+\f1\b0  from the Mongodb and resending to the kafka topic.\
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 Save the static data below to a table and create an API method to return a list of status ids with descriptions:\
+
+\f0\b AllocationStatusId details
+\f1\b0 \
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf5 \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf5 \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+
+\f0\b \cf2 AllocationStatusID
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+
+\f0\b \cf2 Description
+\f1\b0 \cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 0\cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 Request Made\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 1\cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 Sent to Kafka for Processing\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 2\cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 Successful order placed\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 3\cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 Failed\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2613\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth3679\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 4\cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+\cf2 Order Complete\cell \lastrow\row
+\pard\pardeftab720\sa160\qc\partightenfactor0
+\cf4 \
+\pard\pardeftab720\sa360\partightenfactor0
+
+\f0\b\fs36 \cf2 Testing, capacity planning: \
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth13873\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf5 \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1346\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf5 \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+
+\fs32 \cf2 Requirement
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\sa320\qc\partightenfactor0
+
+\f0\b \cf2 Jira reference
+\f1\b0 \cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth13873\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1346\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+\cf2 Create load tests to prove that KTable entries on kafka/concluent cloud does not have performance degradation on millions of groups.\
+Since KTable entries cannot be evicted on trade group complete, we will expire the entries by date ( start with 7 day retention), but using our current max client base, the KTables should be able to still aggregate fast enough after a week and having millions of groupIds in its key value pair data structures.\cell 
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://purplegroup3.atlassian.net/browse/EBA-670"}}{\fldrslt \cf3 \ul \ulc3 EBA-670}} - Getting issue details... STATUS \cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth13873\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1346\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+\cf2 Create test controller methods to generate random groups of x messages allocated to the same group and send to Trade Allocation monitor topic.\
+Takes number of trades as input, generates new UUID and number of trades with correct values and status = 1. Returns the groupID\cell 
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://purplegroup3.atlassian.net/browse/EBA-656"}}{\fldrslt \cf3 \ul \ulc3 EBA-656}} - Getting issue details... STATUS \cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth13873\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrs\brdrw20\brdrcf5 \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1346\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrs\brdrw20\brdrcf5 \clbrdrr\brdrs\brdrw20\brdrcf5 \clpadt100 \clpadl100 \clpadb100 \clpadr100 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+\cf2 Create test controller method to update percentage passed and failed by supplying a passPercentage as input.\
+Eg. If you will supply groupID and passRate = 70%. The method will query the database by groupId, update the statuses of the 70% to 2 or 4 depending on tradeTypeId and failed status = 3 of the rest in the group above to mimic trades that fail or complete to test aggregator logic. It will then resend the trades to the 
+\f0\b trade_allocation_status_update_monitor
+\f1\b0  topic Takes in GroupID as param and status.\cell 
+\pard\intbl\itap1\pardeftab720\sa320\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://purplegroup3.atlassian.net/browse/EBA-657"}}{\fldrslt \cf3 \ul \ulc3 EBA-657}} - Getting issue details... STATUS \cell \lastrow\row
+\pard\pardeftab720\sa320\partightenfactor0
+\cf2 Load test results:\
+Local load tests using transactional producing saw between 600-800 kafka messages being sent per second.\
+Mongo db results for processing 10 000 trade allocations were: 10 seconds to insert 1000, 45 seconds to query by trade allocation id, and 10 seconds to update the status and save them again.\
+This was further improved by adding indexes to groupId and TradeAllocationId in the respective Tradeallocation and TradeGroupstatus tables, which increased performance to 10 000 records:\
+insert : 10 sec, query = 5 seconds, update = 4 seconds.\
+}

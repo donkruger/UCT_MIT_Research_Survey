@@ -8,7 +8,7 @@ and helper functions for the survey application.
 import base64
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Any
 import streamlit as st
 import datetime
 
@@ -256,3 +256,104 @@ def svg_image_html(path: Path, width: int = 200) -> str:
     except Exception:
         # If the file cannot be read, return empty string to avoid breaking the UI
         return ""
+
+def get_trade_protection_config() -> Dict[str, Any]:
+    """
+    Retrieve trade protection configuration from secrets.toml with security validation
+    
+    SECURITY FEATURES:
+    - Fail-safe defaults (protection always enabled)
+    - Input sanitization for all configuration values
+    - Environment-specific validation
+    - Audit logging of all configuration access
+    
+    Returns:
+        Dict with validated configuration values
+    """
+    from datetime import datetime
+    
+    # SECURITY: Default to most restrictive settings
+    default_config = {
+        'block_non_ut_trades': True,  # FAIL-SAFE: Always default to protection ON
+        'supported_prefixes': ['UT.ZA'],  # HARDCODED: Only UT trades by default
+        'protection_mode': 'strict',  # SECURE: Block by default
+        'audit_all_validations': True,  # COMPLIANCE: Always audit
+        'allow_protection_override': False,  # SECURITY: No overrides in production
+        'max_validation_attempts': 3  # RATE LIMITING: Prevent abuse
+    }
+    
+    try:
+        # Get configuration from secrets with extensive validation
+        secrets_config = st.secrets.get('trade_protection', {})
+        
+        # SECURITY: Validate each configuration parameter
+        config = {}
+        
+        # Validate block_non_ut_trades (must be boolean)
+        config['block_non_ut_trades'] = bool(secrets_config.get('block_non_ut_trades', True))
+        
+        # SECURITY: Validate supported_prefixes (sanitize inputs)
+        raw_prefixes = secrets_config.get('supported_contract_prefixes', ['UT.ZA'])
+        if not isinstance(raw_prefixes, list):
+            raw_prefixes = ['UT.ZA']  # Fail-safe fallback
+            
+        # Sanitize prefixes - only allow alphanumeric with dots
+        validated_prefixes = []
+        for prefix in raw_prefixes:
+            if isinstance(prefix, str) and re.match(r'^[A-Z0-9.]+$', prefix):
+                validated_prefixes.append(prefix)
+        
+        config['supported_prefixes'] = validated_prefixes if validated_prefixes else ['UT.ZA']
+        
+        # SECURITY: Validate protection_mode
+        valid_modes = ['strict', 'audit_warn']  # Limited options
+        mode = secrets_config.get('protection_mode', 'strict')
+        config['protection_mode'] = mode if mode in valid_modes else 'strict'
+        
+        # SECURITY: Environment-specific validation
+        environment = st.secrets.get('trade_api', {}).get('environment', 'uat')
+        
+        # PRODUCTION HARDENING: Disable overrides in production
+        if environment == 'prod':
+            config['allow_protection_override'] = False
+            config['protection_mode'] = 'strict'  # Force strict mode in production
+        else:
+            config['allow_protection_override'] = bool(secrets_config.get('allow_protection_override', False))
+        
+        config['audit_all_validations'] = bool(secrets_config.get('audit_all_validations', True))
+        config['max_validation_attempts'] = min(int(secrets_config.get('max_validation_attempts', 3)), 10)
+        
+        # AUDIT: Log configuration access
+        _audit_config_access(config, environment)
+        
+        return config
+        
+    except Exception as e:
+        # SECURITY: Log error and return safe defaults
+        st.error(f"&#9888; Configuration error: Using secure defaults. Error: {str(e)}")
+        _audit_config_access(default_config, 'unknown', error=str(e))
+        return default_config
+
+def _audit_config_access(config: Dict[str, Any], environment: str, error: str = None):
+    """
+    Audit all configuration access for compliance tracking
+    """
+    from datetime import datetime
+    
+    try:
+        audit_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'environment': environment,
+            'protection_enabled': config.get('block_non_ut_trades', True),
+            'supported_prefixes_count': len(config.get('supported_prefixes', [])),
+            'protection_mode': config.get('protection_mode', 'strict'),
+            'error': error
+        }
+        
+        # Store in session state for email audit trail
+        if 'protection_audit_log' not in st.session_state:
+            st.session_state['protection_audit_log'] = []
+        st.session_state['protection_audit_log'].append(audit_entry)
+        
+    except Exception:
+        pass  # Don't fail if audit logging fails

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  trading-app:
+    build: .
+    container_name: trading-sheet-applet
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env  # Create this from env.example
+    environment:
+      - STRICT_STARTUP=false
+      - OVERWRITE_SECRETS=true
+    volumes:
+      # Mount source for hot-reload during development
+      - ./app:/app/app
+      - ./assets:/app/assets
+      # Optional: persist logs
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Optional: Add logging configuration for production-like testing
+# logging:
+#   driver: "json-file"
+#   options:
+#     max-size: "10m"
+#     max-file: "3"

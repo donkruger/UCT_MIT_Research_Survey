@@ -1,14 +1,19 @@
 [theme]
-primaryColor = "#1e3ea2"
-base = "light"
+# EasyEquities Red Theme Configuration
+primaryColor = "#ed1847"           # EasyEquities primary red for buttons, links, and accents
+backgroundColor = "#ffffff"        # Clean white background
+secondaryBackgroundColor = "#f8f9fa"  # Light gray for containers and sidebars
+textColor = "#262730"             # Dark text for readability
+
+# Optional: Custom font
+font = "sans serif"               # Options: "sans serif", "serif", "monospace"
 
 [server]
+# Development settings
+headless = false
 enableCORS = false
-enableXsrfProtection = false
-maxUploadSize = 4
+enableXsrfProtection = true
 
-[client]
-showErrorDetails = false
-
-[global]
-developmentMode = false
+[browser]
+# Automatically open browser on startup
+gatherUsageStats = false

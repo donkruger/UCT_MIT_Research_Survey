@@ -114,7 +114,7 @@ def serialize_answers_with_metadata(spec: FormSpec, ns: str):
     try:
         from app.utils import is_dev_mode
         if is_dev_mode():
-            st.info(f"🔧 **Dev Mode Active** - Enhanced serializing answers for {spec.title}")
+            st.info(f"⚙ **Dev Mode Active** - Enhanced serializing answers for {spec.title}")
     except ImportError:
         pass
     
@@ -193,7 +193,7 @@ def serialize_answers_with_metadata(spec: FormSpec, ns: str):
                     sec_dict.update(payload if isinstance(payload, dict) else {})
                     
                 except Exception as e:
-                    st.error(f"❌ Error serializing component {sec.component_id}: {e}")
+                    st.error(f"&#10007; Error serializing component {sec.component_id}: {e}")
                     continue
 
         answers[sec.title] = sec_dict
@@ -250,7 +250,7 @@ def _serialize_answers_legacy(spec: FormSpec, ns: str) -> Tuple[Dict[str, Any], 
     try:
         from app.utils import is_dev_mode
         if is_dev_mode():
-            st.info(f"🔧 **Dev Mode Active** - Legacy serializing answers for {spec.title}")
+            st.info(f"⚙ **Dev Mode Active** - Legacy serializing answers for {spec.title}")
     except ImportError:
         pass
     
@@ -293,7 +293,7 @@ def _serialize_answers_legacy(spec: FormSpec, ns: str) -> Tuple[Dict[str, Any], 
                     sec_dict.update(payload if isinstance(payload, dict) else {})
                     uploads.extend(comp_uploads or [])
                 except Exception as e:
-                    st.error(f"❌ Error serializing component {sec.component_id}: {e}")
+                    st.error(f"&#10007; Error serializing component {sec.component_id}: {e}")
                     continue
 
         answers[sec.title] = sec_dict

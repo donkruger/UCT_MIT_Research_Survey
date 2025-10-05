@@ -10,7 +10,7 @@ from app.utils import svg_image_html
 def _get_logo_base64():
     """Get the UCT logo as base64 encoded string."""
     try:
-        logo_path = Path(__file__).parent.parent.parent / "assets" / "logos" / "UCT_logo.png"
+        logo_path = Path(__file__).parent.parent.parent / "assets" / "logos" / "EE_logo.png"
         with open(logo_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
     except Exception as e:
@@ -50,7 +50,7 @@ def render_sidebar():
     /* Sidebar background with glassmorphism */
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div:first-child {
-        background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
+        background: linear-gradient(180deg, #ed1847 0%, #c41230 100%) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
         opacity: 1 !important;
@@ -68,8 +68,8 @@ def render_sidebar():
         right: 0;
         bottom: 0;
         background: linear-gradient(135deg, 
-            rgba(30, 64, 175, 0.1) 0%, 
-            rgba(59, 130, 246, 0.1) 100%);
+            rgba(237, 24, 71, 0.1) 0%, 
+            rgba(196, 18, 48, 0.1) 100%);
         pointer-events: none;
         z-index: 1;
     }
@@ -101,16 +101,16 @@ def render_sidebar():
         background: rgba(255, 255, 255, 0.15) !important;
         border-color: rgba(255, 255, 255, 0.3) !important;
         transform: translateX(4px) !important;
-        box-shadow: 0 4px 12px rgba(74, 105, 255, 0.2) !important;
+        box-shadow: 0 4px 12px rgba(237, 24, 71, 0.2) !important;
     }
     
     /* Active page indicator */
     [data-testid="stSidebar"] a[aria-current="page"] {
         background: linear-gradient(135deg, 
-            rgba(74, 105, 255, 0.3) 0%, 
-            rgba(139, 92, 246, 0.3) 100%) !important;
-        border-color: rgba(74, 105, 255, 0.5) !important;
-        box-shadow: 0 0 20px rgba(74, 105, 255, 0.2) !important;
+            rgba(237, 24, 71, 0.3) 0%, 
+            rgba(196, 18, 48, 0.3) 100%) !important;
+        border-color: rgba(237, 24, 71, 0.5) !important;
+        box-shadow: 0 0 20px rgba(237, 24, 71, 0.2) !important;
     }
     
     /* Text color consistency */
@@ -125,15 +125,15 @@ def render_sidebar():
     
     /* All expander custom styling removed to use Streamlit defaults */
     
-    /* Override gradient on expander headers - remove or reverse the blue to white gradient */
+    /* Override gradient on expander headers with red theme */
     .streamlit-expanderHeader {
-        background: #4a5fb8 !important;  /* Solid blue instead of gradient */
+        background: #ed1847 !important;  /* Red theme instead of blue */
         background-image: none !important;  /* Remove any gradient */
     }
     
-    /* Alternative: Reverse the gradient direction (white to blue instead of blue to white) */
+    /* Alternative: Red gradient for headers */
     .streamlit-expanderHeader[class*="st-emotion-cache"] {
-        background: linear-gradient(90deg, #6b7ec8 0%, #4a5fb8 100%) !important;  /* Reversed: lighter to darker */
+        background: linear-gradient(90deg, #ed1847 0%, #c41230 100%) !important;  /* Red gradient */
     }
     
     /* Ensure text is white on the new backgrounds */
@@ -257,7 +257,7 @@ def render_sidebar():
         left: 50%;
         width: 100px;
         height: 100px;
-        background: radial-gradient(circle, rgba(74, 105, 255, 0.3) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(237, 24, 71, 0.3) 0%, transparent 70%);
         border-radius: 50%;
         transform: translate(-50%, -50%);
         animation: pulse 3s ease-in-out infinite;
@@ -273,12 +273,12 @@ def render_sidebar():
         width: 80px;
         height: 80px;
         margin: 0 auto 1rem;
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #ed1847 0%, #c41230 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 30px rgba(30, 64, 175, 0.3);
+        box-shadow: 0 10px 30px rgba(237, 24, 71, 0.3);
         overflow: hidden;
     }
     
@@ -341,11 +341,11 @@ def render_sidebar():
     }
     
     .progress-fill {
-        background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+        background: linear-gradient(90deg, #ed1847 0%, #c41230 100%);
         height: 100%;
         border-radius: 8px;
         transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px rgba(30, 64, 175, 0.5);
+        box-shadow: 0 0 10px rgba(237, 24, 71, 0.5);
     }
     
     .progress-steps {
@@ -376,8 +376,8 @@ def render_sidebar():
     }
     
     .step-circle.active {
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-        border-color: #1e40af;
+        background: linear-gradient(135deg, #ed1847 0%, #c41230 100%);
+        border-color: #ed1847;
     }
     
     .step-circle.inactive {
@@ -409,7 +409,7 @@ def render_sidebar():
     }
     
     .step-connector.active {
-        background: linear-gradient(90deg, #1e40af, #3b82f6);
+        background: linear-gradient(90deg, #ed1847, #c41230);
     }
     
     .step-connector.inactive {
@@ -435,8 +435,8 @@ def render_sidebar():
                 <div class="logo-icon">
                     <img src="data:image/png;base64,{}" alt="UCT Logo">
                 </div>
-                <h2 class="logo-title">UCT Research</h2>
-                <p class="logo-subtitle">Design Science Study</p>
+                <h2 class="logo-title">Trading Sheet</h2>
+                <p class="logo-subtitle">Risk Team Interim Solution</p>
             </div>
         </div>
         """.format(_get_logo_base64()), unsafe_allow_html=True)
@@ -452,14 +452,14 @@ def render_sidebar():
         """, unsafe_allow_html=True)
         
         # Navigation links
-        st.page_link('pages/1_Informed_Consent.py', label='📋 Informed Consent')
-        st.page_link('main.py', label='📊 Research Questionnaire')
-        st.page_link('pages/3_Declaration_and_Submit.py', label='✓ Review & Submit')
+        st.page_link('pages/1_Informed_Consent.py', label='🛡 Declaration & Acceptance')
+        st.page_link('main.py', label='▦ Trading Sheet Upload')
+        st.page_link('pages/3_Declaration_and_Submit.py', label='&#10003; Review & Submit')
         
         # Divider
         st.markdown('<hr style="border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); margin: 1.5rem 0;">', unsafe_allow_html=True)
         
-        # Progress tracker with 3 steps: Consent → Questionnaire → Submit
+        # Progress tracker with 3 steps: Declare → Upload → Submit
         current_page = st.session_state.get("current_page", "consent")
         consent_given = st.session_state.get("consent_given", False)
         
@@ -496,14 +496,14 @@ def render_sidebar():
                     <div class="step-circle {step1_class}">
                         <span class="step-number">1</span>
                     </div>
-                    <small class="step-label">Consent</small>
+                    <small class="step-label">Declare</small>
                 </div>
                 <div class="step-connector {connector1_class}"></div>
                 <div class="progress-step">
                     <div class="step-circle {step2_class}">
                         <span class="step-number">2</span>
                     </div>
-                    <small class="step-label">Survey</small>
+                    <small class="step-label">Upload</small>
                 </div>
                 <div class="step-connector {connector2_class}"></div>
                 <div class="progress-step">

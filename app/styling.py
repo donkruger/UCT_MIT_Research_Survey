@@ -356,10 +356,18 @@ FORM_STYLING_CSS = """
 </style>
 """
 
-# Premium Button Styling
+# Premium Button Styling with EasyEquities Red Theme
 BUTTON_STYLING_CSS = """
 <style>
-/* Primary button with gradient */
+:root {
+    /* EasyEquities Red Color Palette */
+    --ee-red-primary: #ed1847;
+    --ee-red-secondary: #c41230;
+    --ee-red-dark: #a00e26;
+    --ee-red-light: #f04568;
+}
+
+/* Primary button with red gradient */
 .stButton > button {
     font-family: var(--font-secondary) !important;
     font-weight: var(--font-medium) !important;
@@ -367,7 +375,7 @@ BUTTON_STYLING_CSS = """
     padding: 0.75rem 1.5rem !important;
     border-radius: var(--radius-lg) !important;
     border: none !important;
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--accent-purple) 100%) !important;
+    background: linear-gradient(135deg, var(--ee-red-primary) 0%, var(--ee-red-secondary) 100%) !important;
     color: white !important;
     box-shadow: var(--shadow-md) !important;
     transition: all var(--transition-base) !important;
@@ -380,7 +388,7 @@ BUTTON_STYLING_CSS = """
 .stButton > button:hover {
     transform: translateY(-2px) !important;
     box-shadow: var(--shadow-lg) !important;
-    background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-purple) 100%) !important;
+    background: linear-gradient(135deg, var(--ee-red-light) 0%, var(--ee-red-primary) 100%) !important;
 }
 
 /* Active state */
@@ -699,6 +707,109 @@ ACCESSIBILITY_CSS = """
 </style>
 """
 
+# Minimal EasyEquities Theme Adjustments
+MINIMAL_RED_THEME_CSS = """
+<style>
+/* Minimal adjustments to complement Streamlit's config.toml theme */
+
+/* Fix button borders and backgrounds to use EasyEquities red instead of blue */
+.stButton > button,
+button[data-testid="baseButton-secondary"],
+button[data-baseweb="button"],
+div[data-testid="stButton"] > button {
+    border-color: #ed1847 !important;
+    color: #ed1847 !important;
+}
+
+.stButton > button:hover,
+button[data-testid="baseButton-secondary"]:hover,
+button[data-baseweb="button"]:hover,
+div[data-testid="stButton"] > button:hover {
+    border-color: #c41230 !important;
+    background-color: rgba(237, 24, 71, 0.1) !important;
+    color: #c41230 !important;
+}
+
+.stButton > button:focus,
+button[data-testid="baseButton-secondary"]:focus,
+button[data-baseweb="button"]:focus,
+div[data-testid="stButton"] > button:focus {
+    border-color: #ed1847 !important;
+    box-shadow: 0 0 0 0.2rem rgba(237, 24, 71, 0.25) !important;
+    color: #ed1847 !important;
+}
+
+/* Target primary buttons specifically */
+.stButton > button[kind="primary"],
+button[data-testid="baseButton-primary"] {
+    background-color: #ed1847 !important;
+    border-color: #ed1847 !important;
+    color: white !important;
+}
+
+.stButton > button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover {
+    background-color: #c41230 !important;
+    border-color: #c41230 !important;
+    color: white !important;
+}
+
+/* Fix info boxes - target only the top border/line that's blue */
+div[data-testid="stAlert"]::before,
+.stAlert::before {
+    background: #ed1847 !important;
+}
+
+/* Override the blue top border specifically */
+div[data-testid="stAlert"] {
+    border-top: 3px solid #ed1847 !important;
+}
+
+/* Remove any conflicting background colors to prevent double cards */
+div[data-testid="stAlert"] > div {
+    background: transparent !important;
+}
+
+/* Progress bars inherit theme color automatically via config.toml */
+/* Links inherit theme color automatically via config.toml */
+
+/* Subtle red tint for execution summary containers */
+.stExpander[data-testid="stExpander"]:has([data-testid="stMarkdownContainer"]:contains("Execution Summary")) {
+    border-left: 3px solid #ed1847 !important;
+}
+
+/* Status indicators - minimal styling */
+div[data-testid="stMarkdownContainer"]:has(p:contains("Status:")) {
+    border-left: 3px solid #ed1847 !important;
+    padding-left: 0.75rem !important;
+}
+
+/* Override any remaining blue outlines on interactive elements */
+input:focus, select:focus, textarea:focus {
+    border-color: #ed1847 !important;
+    box-shadow: 0 0 0 0.2rem rgba(237, 24, 71, 0.25) !important;
+}
+
+/* Force override any blue button styling with maximum specificity */
+div[data-testid="column"] .stButton > button,
+div[data-testid="stVerticalBlock"] .stButton > button,
+.main .stButton > button {
+    background: linear-gradient(135deg, #ed1847 0%, #c41230 100%) !important;
+    border: 1px solid #ed1847 !important;
+    color: white !important;
+}
+
+div[data-testid="column"] .stButton > button:hover,
+div[data-testid="stVerticalBlock"] .stButton > button:hover,
+.main .stButton > button:hover {
+    background: linear-gradient(135deg, #f04568 0%, #ed1847 100%) !important;
+    border: 1px solid #c41230 !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+}
+</style>
+"""
+
 # Combine all styles for easy import
 def get_all_styles():
     """Return all CSS styles combined."""
@@ -712,7 +823,8 @@ def get_all_styles():
         CONTAINER_STYLING_CSS +
         PROGRESS_STYLING_CSS +
         RESPONSIVE_CSS +
-        ACCESSIBILITY_CSS
+        ACCESSIBILITY_CSS +
+        MINIMAL_RED_THEME_CSS
     )
 
 # Legacy exports for compatibility

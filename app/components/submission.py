@@ -96,18 +96,18 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 <span style="color: #6b7280;">{int(progress_value * 100)}%</span>
             </div>
             <div style="
-                background: rgba(74, 105, 255, 0.1);
+                background: rgba(237, 24, 71, 0.1);
                 border-radius: 8px;
                 height: 8px;
                 overflow: hidden;
             ">
                 <div style="
-                    background: linear-gradient(90deg, #4a69ff 0%, #8b5cf6 100%);
+                    background: linear-gradient(90deg, #ed1847 0%, #c41230 100%);
                     height: 100%;
                     width: {progress_value * 100}%;
                     border-radius: 8px;
                     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 2px 8px rgba(74, 105, 255, 0.3);
+                    box-shadow: 0 2px 8px rgba(237, 24, 71, 0.3);
                 "></div>
             </div>
         </div>
@@ -219,7 +219,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
             text-align: center;
         ">
             <div style="
-                background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+                background: linear-gradient(135deg, #ed1847 0%, #c41230 100%);
                 width: 40px;
                 height: 40px;
                 border-radius: 10px;
@@ -228,7 +228,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 align-items: center;
                 justify-content: center;
             ">
-                <span style="color: white; font-size: 1.25rem;">⏰</span>
+                <span style="color: white; font-size: 1.25rem;">◷</span>
             </div>
             <p style="color: #6b7280; font-size: 0.75rem; margin: 0 0 0.25rem;">Time</p>
             <p style="color: #1f2937; font-weight: 600; margin: 0;">{submission_time}</p>
@@ -256,7 +256,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 align-items: center;
                 justify-content: center;
             ">
-                <span style="color: white; font-size: 1.25rem;">📅</span>
+                <span style="color: white; font-size: 1.25rem;">◷</span>
             </div>
             <p style="color: #6b7280; font-size: 0.75rem; margin: 0 0 0.25rem;">Date</p>
             <p style="color: #1f2937; font-weight: 600; margin: 0;">{submission_date}</p>
@@ -284,7 +284,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 align-items: center;
                 justify-content: center;
             ">
-                <span style="color: white; font-size: 1.25rem;">✓</span>
+                <span style="color: white; font-size: 1.25rem;">&#10003;</span>
             </div>
             <p style="color: #6b7280; font-size: 0.75rem; margin: 0 0 0.25rem;">Responses</p>
             <p style="color: #1f2937; font-weight: 600; margin: 0;">{response_count}</p>
@@ -307,7 +307,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
             align-items: center;
         ">
             <span style="
-                background: linear-gradient(135deg, #4a69ff 0%, #8b5cf6 100%);
+                background: linear-gradient(135deg, #ed1847 0%, #c41230 100%);
                 color: white;
                 width: 32px;
                 height: 32px;
@@ -339,7 +339,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
         if csv_string:
             csv_name = pdf_name.replace('.pdf', '.csv')
             st.download_button(
-                label="📊 Download CSV Data",
+                label="▦ Download CSV Data",
                 data=csv_string,
                 file_name=csv_name,
                 mime="text/csv",
@@ -379,7 +379,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 )
     
     # Raw data (collapsed, modernized)
-    with st.expander("📊 View Raw Submission Data"):
+    with st.expander("▦ View Raw Submission Data"):
         st.json(json.loads(json.dumps(answers, default=str)), expanded=False)
     
     # Next steps with attractive info box
@@ -407,7 +407,7 @@ def handle_submission(answers: Dict[str, Any], uploaded_files: List[Optional[st.
                 align-items: center;
                 justify-content: center;
                 margin-right: 0.75rem;
-            ">✓</span>
+            ">&#10003;</span>
             What Happens Next?
         </h3>
         <ul style="

@@ -2,6 +2,9 @@
 
 .streamlit/secrets.toml
 
+postman/TradeAllocationsMonitor.postman_collection.json
+docs/AVA_reference_files
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -184,6 +187,11 @@ __pycache__/
 
 # Streamlit secrets (important - don't commit credentials)
 .streamlit/secrets.toml
+
+# Keep templates and examples (these ARE committed for DevOps-friendly secrets)
+!.streamlit/secrets.template.toml
+!.streamlit/secrets.example.toml
+!env.example
 
 # Temporary files
 *.tmp

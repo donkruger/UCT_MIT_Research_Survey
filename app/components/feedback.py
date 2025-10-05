@@ -54,7 +54,7 @@ def render_feedback_component() -> Optional[Dict[str, Any]]:
         # Validate email format if provided
         email_valid = True
         if email and email.strip() and not _is_valid_email(email):
-            st.error("⚠️ Please enter a valid email address format.")
+            st.error("&#9888; Please enter a valid email address format.")
             email_valid = False
         
         # Return feedback data if any field is filled and email is valid
