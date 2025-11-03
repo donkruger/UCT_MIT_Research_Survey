@@ -42,6 +42,66 @@ docker-compose up
 
 ## For DevOps (Production Deployment)
 
+### Required Environment Variables Checklist
+
+**CRITICAL:** All environment variables must be set in the ECS Task Definition. The template no longer contains default values.
+
+#### Secrets (Store in Vault/Secrets Manager)
+
+```
+EMAIL_APP_PASSWORD              # Gmail app-specific password
+TRADE_API_KEY                   # Trade Allocations API bearer token
+LLM_GEMINI_API_KEY             # Gemini API key (optional but must be set)
+USERS_ADMIN_USER_1             # "email|name|hash|role|enabled"
+USERS_ADMIN_USER_2             # "email|name|hash|role|enabled" (optional)
+```
+
+#### Configuration Variables (Set in ECS environment array)
+
+```
+# Email Configuration
+EMAIL_ADDRESS=trading@easyequities.co.za
+EMAIL_NOTIFICATION_ADDRESS=trading-ops@easyequities.co.za
+EMAIL_RECIPIENT_ADDRESS=trading-ops@easyequities.co.za
+EMAIL_SMTP_SERVER=smtp.gmail.com
+
+# Trade API Configuration
+TRADE_API_ENVIRONMENT=uat
+TRADE_API_UAT_BASE_URL=https://tradeallocationsapi.purple-uat.easyequities.io
+TRADE_API_UAT_MONITOR_URL=https://trade-allocations-monitor.purple-uat.easyequities.io
+TRADE_API_QA_BASE_URL=https://tradeallocationsapi.purple-qa.easyequities.io
+TRADE_API_QA_MONITOR_URL=https://trade-allocations-monitor.purple-qa.easyequities.io
+TRADE_API_PROD_BASE_URL=https://tradeallocationsapi.easyequities.io
+TRADE_API_PROD_MONITOR_URL=https://trade-allocations-monitor.easyequities.io
+TRADE_API_SYSTEM_ID=27
+TRADE_API_TIMEOUT=30
+TRADE_API_MAX_RETRIES=3
+TRADE_API_POLLING_INTERVAL=5
+TRADE_API_MAX_POLLING_DURATION=300
+TRADE_API_DEFAULT_TRADER_ID=45314
+
+# Trade Protection
+TRADE_PROTECTION_BLOCK_NON_UT=true
+TRADE_PROTECTION_PREFIX_1=UT.ZA
+TRADE_PROTECTION_MODE=strict
+TRADE_PROTECTION_AUDIT_ALL=true
+TRADE_PROTECTION_ALLOW_OVERRIDE=false
+TRADE_PROTECTION_MAX_ATTEMPTS=3
+
+# Authentication
+AUTH_PROVIDER=secrets
+AUTH_SESSION_TIMEOUT=60
+AUTH_INACTIVITY_TIMEOUT=30
+AUTH_MAX_LOGIN_ATTEMPTS=5
+AUTH_LOCKOUT_DURATION=15
+AUTH_LOG_ATTEMPTS=true
+AUTH_LOG_FAILED_ONLY=false
+
+# Startup Configuration
+STRICT_STARTUP=true
+OVERWRITE_SECRETS=true
+```
+
 ### HashiCorp Vault Configuration
 
 Store these secrets in Vault under `secret/trading-sheet-applet/`:
@@ -50,8 +110,17 @@ Store these secrets in Vault under `secret/trading-sheet-applet/`:
 email_app_password          # Gmail app-specific password
 trade_api_key              # Trade Allocations API bearer token
 llm_gemini_api_key         # Gemini API key
-users/admin_don_ee         # "email|name|hash|role|enabled"
-users/admin_don_ec         # "email|name|hash|role|enabled"
+users/admin_user_1         # "email|name|hash|role|enabled"
+users/admin_user_2         # "email|name|hash|role|enabled"
+```
+
+**IMPORTANT:** Store values WITHOUT quotes. Example:
+```
+# CORRECT:
+don@easyequities.co.za|Don Kruger|$2b$12$...|admin|true
+
+# WRONG (will cause parsing errors):
+'don@easyequities.co.za|Don Kruger|$2b$12$...|admin|true'
 ```
 
 ### ECS Task Definition
@@ -162,7 +231,24 @@ OVERWRITE_SECRETS=true ./entrypoint.sh streamlit run app/main.py
 **"Invalid user data format"**
 - Format must be: `email|name|password_hash|role|enabled`
 - Example: `user@ex.com|Name|$2b$12$abc...|admin|true`
-- Use single quotes to avoid shell expansion of `$`
+- **CRITICAL:** Store in Vault WITHOUT quotes (quotes become part of the value)
+
+**"Error parsing secrets file: Unbalanced quotes"**
+- User credentials in Vault have extra single/double quotes
+- Remove ALL quotes from Vault values
+- Correct format: `email|name|hash|role|enabled` (no surrounding quotes)
+
+**"This float doesn't have a leading digit" or literal `${VAR}` in secrets.toml**
+- Environment variable not set in ECS Task Definition
+- Check CloudWatch logs for "⚠️ WARNING: Found unsubstituted environment variables"
+- Ensure `OVERWRITE_SECRETS=true` is set
+- Verify ALL required variables are in the ECS Task Definition
+
+**envsubst Limitation (IMPORTANT)**
+- `envsubst` does NOT support bash default syntax: `${VAR:-default}`
+- Template now uses simple `${VAR}` placeholders only
+- ALL environment variables MUST be explicitly set in ECS
+- No fallback defaults - missing variables will cause startup failure in strict mode
 
 ---
 

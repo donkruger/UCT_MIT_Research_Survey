@@ -129,6 +129,28 @@ fi
 
 echo "✅ Configured $user_count admin user(s)"
 
+# -----------------------------------------------------------------------------
+# Validate that all environment variables were substituted
+# -----------------------------------------------------------------------------
+echo "🔍 Checking for unsubstituted variables..."
+
+unsubstituted=$(grep -oE '\$\{[A-Za-z_][A-Za-z0-9_]*\}' .streamlit/secrets.toml.tmp || true)
+
+if [ -n "$unsubstituted" ]; then
+  echo "⚠️  WARNING: Found unsubstituted environment variables:" >&2
+  echo "$unsubstituted" | sort -u | sed 's/^/    /' >&2
+  
+  if [ "${STRICT_STARTUP}" = "true" ]; then
+    echo "❌ FATAL: Unsubstituted variables found in strict mode" >&2
+    echo "    Set all required environment variables in ECS Task Definition" >&2
+    exit 1
+  else
+    echo "    Continuing in non-strict mode (these will appear as literals in config)" >&2
+  fi
+else
+  echo "✅ All environment variables substituted successfully"
+fi
+
 # Move temp file to final location
 mv .streamlit/secrets.toml.tmp .streamlit/secrets.toml
 

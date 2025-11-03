@@ -355,6 +355,82 @@ aws ecs update-service --cluster <cluster> --service <service> \
 
 ---
 
+## ⚠️ Lessons Learned - envsubst Limitation (CRITICAL)
+
+### The Issue
+
+During UAT deployment (November 3, 2025), we discovered that **`envsubst` does NOT support bash-style default value syntax** (`${VAR:-default}`).
+
+**Problem:**
+- Template used: `system_identifier_id = ${TRADE_API_SYSTEM_ID:-27}`
+- `envsubst` left it as literal: `system_identifier_id = ${TRADE_API_SYSTEM_ID:-27}`
+- Application failed to start with: "This float doesn't have a leading digit"
+
+**Root Cause:**
+`envsubst` only understands simple `${VAR}` substitution, not bash's `${VAR:-default}` expansion.
+
+### The Solution (Implemented)
+
+1. **Updated `.streamlit/secrets.template.toml`:**
+   - Removed ALL `:-default` syntax
+   - Changed `${VAR:-default}` to `${VAR}`
+   - Now requires ALL environment variables to be explicitly set
+
+2. **Added Validation in `entrypoint.sh`:**
+   - Detects unsubstituted `${VAR}` placeholders after rendering
+   - Fails fast in strict mode if any variables are missing
+   - Provides clear error messages listing missing variables
+
+3. **Updated Documentation:**
+   - `docs/DEVOPS_SECRETS_QUICK_START.md` - Added complete required variables checklist
+   - `env.example` - Marked all variables as REQUIRED with clear comments
+   - Troubleshooting section added for common envsubst issues
+
+### Impact
+
+**Before Fix:**
+- ✗ Environment variables not substituted
+- ✗ Application crashed with cryptic TOML parsing errors
+- ✗ No visibility into which variables were missing
+
+**After Fix:**
+- ✓ Clear validation errors: "Found unsubstituted environment variables: ${TRADE_API_SYSTEM_ID}"
+- ✓ Fail-fast behavior prevents application from starting with incomplete config
+- ✓ Complete checklist of required variables for DevOps
+
+### Additional Issues Resolved
+
+1. **Single Quotes in Vault Values:**
+   - **Problem:** DevOps added single quotes to protect `$` in bcrypt hashes
+   - **Result:** Quotes became part of the value → "Unbalanced quotes" error
+   - **Solution:** Store values in Vault WITHOUT any quotes
+
+2. **User Data Format:**
+   - **Correct:** `don@easyequities.co.za|Don Kruger|$2b$12$...|admin|true`
+   - **Wrong:** `'don@easyequities.co.za|Don Kruger|$2b$12$...|admin|true'`
+
+3. **OVERWRITE_SECRETS Required:**
+   - Must be set to `true` in ECS to regenerate secrets on each container start
+   - Without it, pre-existing template file is used (with placeholders)
+
+### Key Takeaways
+
+1. **Never rely on shell-specific syntax in templates** processed by `envsubst`
+2. **Always validate substitution** before using generated configs
+3. **Document ALL required environment variables** explicitly
+4. **Test in production-like environment** before deployment
+5. **Use strict mode** (`STRICT_STARTUP=true`) to catch issues early
+
+### Files Modified in Fix
+
+- `.streamlit/secrets.template.toml` - Removed all `:-default` syntax
+- `entrypoint.sh` - Added validation for unsubstituted variables
+- `docs/DEVOPS_SECRETS_QUICK_START.md` - Added complete variables checklist
+- `env.example` - Marked all variables as REQUIRED
+- `docs/DEVOPS_SECRETS_IMPLEMENTATION_SUMMARY.md` - This lessons learned section
+
+---
+
 ## ✍️ Sign-Off
 
 - [x] Implementation complete
